@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
+import '../services/auth.dart';
+import '../models/app_user.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -13,14 +14,43 @@ class HomeScreen extends StatelessWidget {
         title: const Text('Home'),
         actions: [
           IconButton(
-            onPressed: () async {
-              await authService.signOut();
-            },
+            onPressed: () => authService.signOut(),
             icon: const Icon(Icons.logout),
           ),
         ],
       ),
-      body: const Center(child: Text('You are logged in!')),
+      body: FutureBuilder<AppUser?>(
+        future: authService.getCurrentUserData(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (!snapshot.hasData || snapshot.data == null) {
+            return const Center(child: Text('No user data found.'));
+          }
+
+          final user = snapshot.data!;
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Name: ${user.name}',
+                  style: const TextStyle(fontSize: 20),
+                ),
+                const SizedBox(height: 8),
+                Text('Age: ${user.age}', style: const TextStyle(fontSize: 20)),
+                const SizedBox(height: 8),
+                Text(
+                  'Email: ${user.email}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }

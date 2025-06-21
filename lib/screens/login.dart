@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
+import '../services/auth.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,9 +19,11 @@ class _LoginScreenState extends State<LoginScreen> {
       try {
         await _authService.signIn(_email, _password);
       } catch (e) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.toString())));
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(e.toString())));
+        }
       }
     }
   }
@@ -40,17 +42,17 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: const InputDecoration(labelText: 'Email'),
                 keyboardType: TextInputType.emailAddress,
                 onSaved: (value) => _email = value!.trim(),
-                validator:
-                    (value) =>
-                        value!.contains('@') ? null : 'Enter a valid email',
+                // validator:
+                //     (value) =>
+                //         value!.contains('@') ? null : 'Enter a valid email',
               ),
               TextFormField(
                 decoration: const InputDecoration(labelText: 'Password'),
                 obscureText: true,
                 onSaved: (value) => _password = value!.trim(),
-                validator:
-                    (value) =>
-                        value!.length >= 6 ? null : 'Minimum 6 characters',
+                // validator:
+                //     (value) =>
+                //         value!.length >= 6 ? null : 'Minimum 6 characters',
               ),
               const SizedBox(height: 20),
               ElevatedButton(onPressed: _submit, child: const Text('Login')),
