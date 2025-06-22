@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/auth.dart';
+import '../services/db.dart';
 
 class DetailsScreen extends StatefulWidget {
   const DetailsScreen({super.key});
@@ -14,11 +15,21 @@ class _DetailsScreenState extends State<DetailsScreen> {
   int _age = 0;
 
   final AuthService _authService = AuthService();
+  final DbService _dbService = DbService();
 
   void _submit() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      await _authService.updateUserDetails(_name, _age);
+      // await _authService.updateUserDetails(_name, _age);
+      final uid = _authService.getCurrentUserId();
+      final email = _authService.getCurrentUserEmail();
+
+      await _dbService.saveUserProfile(
+        uid: uid!,
+        email: email!,
+        name: _name,
+        age: _age,
+      );
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/home');
       }

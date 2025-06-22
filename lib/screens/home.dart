@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/auth.dart';
+import '../services/db.dart';
 import '../models/app_user.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -7,20 +8,21 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authService = AuthService();
+    final _authService = AuthService();
+    final _dbService = DbService();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
         actions: [
           IconButton(
-            onPressed: () => authService.signOut(),
+            onPressed: () => _authService.signOut(),
             icon: const Icon(Icons.logout),
           ),
         ],
       ),
       body: FutureBuilder<AppUser?>(
-        future: authService.getCurrentUserData(),
+        future: _dbService.getCurrentUserProfile(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
