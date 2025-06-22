@@ -34,15 +34,15 @@ class AuthService {
     return null;
   }
 
-  Future<void> updateUserDetails(String name, int age) async {
-    final user = _auth.currentUser;
-    if (user == null) return;
+  // Future<void> updateUserDetails(String name, int age) async {
+  //   final user = _auth.currentUser;
+  //   if (user == null) return;
 
-    await _firestore.collection('users').doc(user.uid).set({
-      'uid': user.uid,
-      'email': user.email,
-      'name': name,
-      'age': age,
-    });
-  }
+  //   await _firestore.collection('users').doc(user.uid).set({
+  //     'uid': user.uid,
+  //     'email': user.email,
+  //     'name': name,
+  //     'age': age,
+  //   });
+  // }
 }
