@@ -6,25 +6,11 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<void> signUp(
-    String email,
-    String password,
-    String name,
-    int age,
-  ) async {
-    UserCredential cred = await _auth.createUserWithEmailAndPassword(
+  Future<void> signUp(String email, String password) async {
+    await _auth.createUserWithEmailAndPassword(
       email: email,
       password: password,
     );
-
-    AppUser user = AppUser(
-      uid: cred.user!.uid,
-      email: email,
-      name: name,
-      age: age,
-    );
-
-    await _firestore.collection('users').doc(user.uid).set(user.toMap());
   }
 
   Future<void> signIn(String email, String password) async {
@@ -46,5 +32,17 @@ class AuthService {
       return AppUser.fromMap(doc.data() as Map<String, dynamic>);
     }
     return null;
+  }
+
+  Future<void> updateUserDetails(String name, int age) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    await _firestore.collection('users').doc(user.uid).set({
+      'uid': user.uid,
+      'email': user.email,
+      'name': name,
+      'age': age,
+    });
   }
 }
