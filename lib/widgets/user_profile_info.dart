@@ -1,78 +1,140 @@
-// lib/widgets/user_profile_info.dart
 import 'package:flutter/material.dart';
-import '../screens/followers.dart';
 import '../screens/following.dart';
+import '../screens/followers.dart';
 
 class UserProfileInfo extends StatelessWidget {
   final Map<String, dynamic> user;
+  final bool isCurrentUser;
 
-  const UserProfileInfo({super.key, required this.user});
+  const UserProfileInfo({
+    super.key,
+    required this.user,
+    this.isCurrentUser = true,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final String uid = user['uid'];
-    final String username = user['username'];
-    final int age = user['age'];
-    final String email = user['email'];
-    final List<String> followers = List<String>.from(user['followers'] ?? []);
-    final List<String> following = List<String>.from(user['following'] ?? []);
+    final username = user['username'] ?? '';
+    final name = user['name'] ?? '';
+    final about = user['about'] ?? '';
+    final movies = user['movies'] ?? 0;
+    final followers = List<String>.from(user['followers'] ?? []);
+    final following = List<String>.from(user['following'] ?? []);
+    final rating = user['rating'] ?? 0;
+    final uid = user['uid'];
 
-    return Center(
+    return Padding(
+      padding: const EdgeInsets.all(16),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Username: $username', style: const TextStyle(fontSize: 20)),
-          const SizedBox(height: 8),
-          Text('Age: $age', style: const TextStyle(fontSize: 20)),
-          const SizedBox(height: 8),
-          Text('Email: $email', style: const TextStyle(fontSize: 16)),
-          const SizedBox(height: 24),
+          // Top-left Username
+          Text(
+            username,
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+
+          // Row: Profile Picture + Stats
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => FollowersListPage(userUid: uid),
-                    ),
-                  );
-                },
-                child: Column(
-                  children: [
-                    Text(
-                      '${followers.length}',
-                      style: const TextStyle(fontSize: 18),
-                    ),
-                    const Text('Followers'),
-                  ],
-                ),
+              // Profile Picture
+              CircleAvatar(
+                radius: 40,
+                backgroundImage:
+                    user['profileUrl'] != null
+                        ? NetworkImage(user['profileUrl'])
+                        : null,
+                child:
+                    user['profileUrl'] == null
+                        ? const Icon(Icons.person, size: 40)
+                        : null,
               ),
-              const SizedBox(width: 40),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => FollowingListPage(userUid: uid),
-                    ),
-                  );
-                },
-                child: Column(
+              const SizedBox(width: 20),
+
+              // Stats: Movies, Followers, Following, Rating
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Text(
-                      '${following.length}',
-                      style: const TextStyle(fontSize: 18),
+                    _StatItem(label: 'Movies', value: movies.toString()),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => FollowersListPage(userUid: uid),
+                          ),
+                        );
+                      },
+                      child: _StatItem(
+                        label: 'Followers',
+                        value: '${followers.length}',
+                      ),
                     ),
-                    const Text('Following'),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => FollowingListPage(userUid: uid),
+                          ),
+                        );
+                      },
+                      child: _StatItem(
+                        label: 'Following',
+                        value: '${following.length}',
+                      ),
+                    ),
+                    _StatItem(label: 'Rating', value: rating.toString()),
                   ],
                 ),
               ),
             ],
           ),
+
+          const SizedBox(height: 16),
+
+          // Name
+          if (name.isNotEmpty)
+            Text(
+              name,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+            ),
+
+          // About
+          if (about.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text(
+                about,
+                style: const TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+            ),
         ],
       ),
+    );
+  }
+}
+
+class _StatItem extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _StatItem({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 4),
+        Text(label, style: const TextStyle(fontSize: 13)),
+      ],
     );
   }
 }

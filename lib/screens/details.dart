@@ -12,7 +12,8 @@ class DetailsScreen extends StatefulWidget {
 class _DetailsScreenState extends State<DetailsScreen> {
   final _formKey = GlobalKey<FormState>();
   String _username = '';
-  int _age = 0;
+  String _name = '';
+  String _about = '';
 
   final AuthService _authService = AuthService();
   final DbService _dbService = DbService();
@@ -28,7 +29,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
         );
         return;
       }
-      // await _authService.updateUserDetails(_username, _age);
+
       final uid = _authService.getCurrentUserId();
       final email = _authService.getCurrentUserEmail();
 
@@ -36,8 +37,11 @@ class _DetailsScreenState extends State<DetailsScreen> {
         uid: uid!,
         email: email!,
         username: _username,
-        age: _age,
+        name: _name,
+        about: _about,
+        profilePicture: null,
       );
+
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/home');
       }
@@ -57,15 +61,17 @@ class _DetailsScreenState extends State<DetailsScreen> {
               TextFormField(
                 decoration: const InputDecoration(labelText: 'Username'),
                 onSaved: (val) => _username = val!.trim(),
+                validator: (val) => val!.isEmpty ? 'Enter your username' : null,
+              ),
+              TextFormField(
+                decoration: const InputDecoration(labelText: 'Full Name'),
+                onSaved: (val) => _name = val!.trim(),
                 validator: (val) => val!.isEmpty ? 'Enter your name' : null,
               ),
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Age'),
-                keyboardType: TextInputType.number,
-                onSaved: (val) => _age = int.tryParse(val!) ?? 0,
-                validator:
-                    (val) =>
-                        int.tryParse(val!) == null ? 'Enter a valid age' : null,
+                decoration: const InputDecoration(labelText: 'About'),
+                maxLines: 3,
+                onSaved: (val) => _about = val!.trim(),
               ),
               const SizedBox(height: 20),
               ElevatedButton(onPressed: _submit, child: const Text('Save')),

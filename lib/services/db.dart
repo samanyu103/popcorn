@@ -28,15 +28,21 @@ class DbService {
     required String uid,
     required String email,
     required String username,
-    required int age,
+    required String name,
+    required String about,
+    required String? profilePicture,
   }) async {
-    await _firestore.collection('users').doc(uid).set({
+    await FirebaseFirestore.instance.collection('users').doc(uid).set({
       'uid': uid,
       'email': email,
       'username': username,
-      'age': age,
+      'name': name,
+      'about': about,
+      'profile_picture': profilePicture,
+      'movies': 0,
       'followers': [],
       'following': [],
+      'rating': 0,
     });
   }
 

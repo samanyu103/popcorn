@@ -2,17 +2,25 @@ class AppUser {
   final String uid;
   final String email;
   final String username;
-  final int age;
-  final List<String> followers;
-  final List<String> following;
+  final String? profilePicture;
+  final String name;
+  final String about;
+  final int movies;
+  final int followers;
+  final int following;
+  final int rating;
 
   AppUser({
     required this.uid,
     required this.email,
     required this.username,
-    required this.age,
+    required this.profilePicture,
+    required this.name,
+    required this.about,
+    required this.movies,
     required this.followers,
     required this.following,
+    required this.rating,
   });
 
   factory AppUser.fromMap(Map<String, dynamic> map) {
@@ -20,9 +28,13 @@ class AppUser {
       uid: map['uid'],
       email: map['email'],
       username: map['username'],
-      age: map['age'],
-      followers: List<String>.from(map['followers'] ?? []),
-      following: List<String>.from(map['following'] ?? []),
+      profilePicture: map['profile_picture'],
+      name: map['name'],
+      about: map['about'],
+      movies: map['movies'] ?? 0,
+      followers: map['followers'] ?? 0,
+      following: map['following'] ?? 0,
+      rating: map['rating'] ?? 0,
     );
   }
 
@@ -31,9 +43,13 @@ class AppUser {
       'uid': uid,
       'email': email,
       'username': username,
-      'age': age,
+      'profile_picture': profilePicture,
+      'name': name,
+      'about': about,
+      'movies': movies,
       'followers': followers,
       'following': following,
+      'rating': rating,
     };
   }
 }
