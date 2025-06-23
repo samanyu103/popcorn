@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'followers.dart';
-import 'following.dart';
+import '../widgets/user_profile_info.dart';
 
 class OtherProfilePage extends StatelessWidget {
   final String username;
 
   const OtherProfilePage({super.key, required this.username});
 
-  Future<Map<String, dynamic>?> _getUserData() async {
+  Future<String?> _getUserUidByUsername() async {
     final query =
         await FirebaseFirestore.instance
             .collection('users')
@@ -19,7 +18,7 @@ class OtherProfilePage extends StatelessWidget {
             .get();
 
     if (query.docs.isNotEmpty) {
-      return query.docs.first.data();
+      return query.docs.first.id;
     }
     return null;
   }
@@ -59,115 +58,60 @@ class OtherProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
 
-    return Scaffold(
-      appBar: AppBar(title: Text("$username's Profile")),
-      body: FutureBuilder<Map<String, dynamic>?>(
-        future: _getUserData(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+    return FutureBuilder<String?>(
+      future: _getUserUidByUsername(),
+      builder: (context, uidSnapshot) {
+        if (uidSnapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
 
-          if (!snapshot.hasData || snapshot.data == null) {
-            return const Center(child: Text('User not found.'));
-          }
+        final uid = uidSnapshot.data;
 
-          final user = snapshot.data!;
-          final otherUserUid = user['uid'];
-          final isFollowing =
-              currentUser != null &&
-              (List<String>.from(
-                user['followers'] ?? [],
-              ).contains(currentUser.uid));
+        if (uid == null) {
+          return const Scaffold(body: Center(child: Text('User not found.')));
+        }
 
-          return Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Username: ${user['username']}',
-                  style: const TextStyle(fontSize: 20),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Age: ${user['age']}',
-                  style: const TextStyle(fontSize: 20),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Email: ${user['email']}',
-                  style: const TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+        return StreamBuilder<DocumentSnapshot>(
+          stream:
+              FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(uid)
+                  .snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData || !snapshot.data!.exists) {
+              return const Scaffold(
+                body: Center(child: Text('User not found.')),
+              );
+            }
+
+            final user = snapshot.data!.data() as Map<String, dynamic>;
+            final otherUserUid = user['uid'];
+            final followers = List<String>.from(user['followers'] ?? []);
+            final isFollowing =
+                currentUser != null && followers.contains(currentUser.uid);
+
+            return Scaffold(
+              appBar: AppBar(title: Text("$username's Profile")),
+              body: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (_) => FollowersListPage(userUid: otherUserUid),
-                          ),
-                        );
-                      },
-                      child: Column(
-                        children: [
-                          Text(
-                            '${(user['followers'] as List).length}',
-                            style: const TextStyle(fontSize: 18),
-                          ),
-                          const Text('Followers'),
-                        ],
+                    UserProfileInfo(user: user),
+                    const SizedBox(height: 20),
+                    if (currentUser != null && currentUser.uid != otherUserUid)
+                      ElevatedButton(
+                        onPressed: () => _toggleFollow(user),
+                        child: Text(isFollowing ? 'Unfollow' : 'Follow'),
                       ),
-                    ),
-                    const SizedBox(width: 40),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (_) => FollowingListPage(userUid: otherUserUid),
-                          ),
-                        );
-                      },
-                      child: Column(
-                        children: [
-                          Text(
-                            '${(user['following'] as List).length}',
-                            style: const TextStyle(fontSize: 18),
-                          ),
-                          const Text('Following'),
-                        ],
-                      ),
-                    ),
                   ],
                 ),
-                const SizedBox(height: 20),
-                if (currentUser != null && currentUser.uid != otherUserUid)
-                  ElevatedButton(
-                    onPressed: () async {
-                      await _toggleFollow(user);
-                      if (context.mounted) {
-                        // Rebuild to reflect change
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (_) => OtherProfilePage(username: username),
-                          ),
-                        );
-                      }
-                    },
-                    child: Text(isFollowing ? 'Unfollow' : 'Follow'),
-                  ),
-              ],
-            ),
-          );
-        },
-      ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
