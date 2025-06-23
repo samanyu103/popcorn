@@ -11,7 +11,7 @@ class DetailsScreen extends StatefulWidget {
 
 class _DetailsScreenState extends State<DetailsScreen> {
   final _formKey = GlobalKey<FormState>();
-  String _name = '';
+  String _username = '';
   int _age = 0;
 
   final AuthService _authService = AuthService();
@@ -20,14 +20,22 @@ class _DetailsScreenState extends State<DetailsScreen> {
   void _submit() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      // await _authService.updateUserDetails(_name, _age);
+
+      final isTaken = await _dbService.isUsernameTaken(_username);
+      if (isTaken) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Username is already taken')),
+        );
+        return;
+      }
+      // await _authService.updateUserDetails(_username, _age);
       final uid = _authService.getCurrentUserId();
       final email = _authService.getCurrentUserEmail();
 
       await _dbService.saveUserProfile(
         uid: uid!,
         email: email!,
-        name: _name,
+        username: _username,
         age: _age,
       );
       if (mounted) {
@@ -47,8 +55,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
           child: Column(
             children: [
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Name'),
-                onSaved: (val) => _name = val!.trim(),
+                decoration: const InputDecoration(labelText: 'Username'),
+                onSaved: (val) => _username = val!.trim(),
                 validator: (val) => val!.isEmpty ? 'Enter your name' : null,
               ),
               TextFormField(

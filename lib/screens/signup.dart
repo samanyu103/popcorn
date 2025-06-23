@@ -48,8 +48,8 @@ class _SignupScreenState extends State<SignupScreen> {
                 decoration: const InputDecoration(labelText: 'Email'),
                 // keyboardType: TextInputType.emailAddress,
                 onSaved: (val) => _email = val!.trim(),
-                validator:
-                    (val) => val!.contains('@') ? null : 'Enter a valid email',
+                // validator:
+                //     (val) => val!.contains('@') ? null : 'Enter a valid email',
               ),
               TextFormField(
                 decoration: const InputDecoration(labelText: 'Password'),

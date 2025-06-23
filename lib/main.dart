@@ -8,6 +8,7 @@ import 'screens/login.dart';
 import 'screens/signup.dart';
 import 'screens/details.dart';
 import 'screens/home.dart';
+import 'screens/search.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
         '/signup': (_) => const SignupScreen(),
         '/details': (_) => const DetailsScreen(),
         '/home': (_) => const HomeScreen(),
+        '/search': (_) => const SearchPage(),
       },
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
@@ -55,9 +57,12 @@ class MyApp extends StatelessWidget {
               }
 
               final userData = userSnapshot.data;
-              if (userData == null ||
-                  userData.name.isEmpty ||
-                  userData.age == 0) {
+              // if (userData == null ||
+              //     userData.username.isEmpty ||
+              //     userData.age == 0) {
+              //   return const DetailsScreen();
+              // }
+              if (userData == null) {
                 return const DetailsScreen();
               }
 

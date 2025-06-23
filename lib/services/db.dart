@@ -13,17 +13,30 @@ class DbService {
     return null;
   }
 
+  Future<bool> isUsernameTaken(String username) async {
+    final result =
+        await _firestore
+            .collection('users')
+            .where('username', isEqualTo: username)
+            .limit(1)
+            .get();
+
+    return result.docs.isNotEmpty;
+  }
+
   Future<void> saveUserProfile({
     required String uid,
     required String email,
-    required String name,
+    required String username,
     required int age,
   }) async {
     await _firestore.collection('users').doc(uid).set({
       'uid': uid,
       'email': email,
-      'name': name,
+      'username': username,
       'age': age,
+      'followers': [],
+      'following': [],
     });
   }
 
