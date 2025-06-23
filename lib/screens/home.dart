@@ -8,21 +8,21 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _authService = AuthService();
-    final _dbService = DbService();
+    final authService = AuthService();
+    final dbService = DbService();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
         actions: [
           IconButton(
-            onPressed: () => _authService.signOut(),
+            onPressed: () => authService.signOut(),
             icon: const Icon(Icons.logout),
           ),
         ],
       ),
       body: FutureBuilder<AppUser?>(
-        future: _dbService.getCurrentUserProfile(),
+        future: dbService.getCurrentUserProfile(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
