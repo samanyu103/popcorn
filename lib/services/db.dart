@@ -8,7 +8,13 @@ class DbService {
   Future<AppUser?> getUserProfile(String uid) async {
     DocumentSnapshot doc = await _firestore.collection('users').doc(uid).get();
     if (doc.exists) {
-      return AppUser.fromMap(doc.data() as Map<String, dynamic>);
+      try {
+        final map = doc.data() as Map<String, dynamic>;
+        return AppUser.fromMap(map);
+      } catch (e, stack) {
+        print("Error in AppUser.fromMap: $e");
+        print(stack);
+      }
     }
     return null;
   }
@@ -49,6 +55,14 @@ class DbService {
   Future<AppUser?> getCurrentUserProfile() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return null;
+    // print("user: ${user.uid}");
     return getUserProfile(user.uid);
+  }
+
+  static Stream<QuerySnapshot> getUsersStream() {
+    return FirebaseFirestore.instance
+        .collection('users')
+        .orderBy('username')
+        .snapshots();
   }
 }

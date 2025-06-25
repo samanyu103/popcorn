@@ -18,6 +18,9 @@ class _LoginScreenState extends State<LoginScreen> {
       _formKey.currentState!.save();
       try {
         await _authService.signIn(_email, _password);
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/home');
+        }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(

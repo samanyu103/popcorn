@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:popcorn/services/db.dart';
 import 'other_profile.dart';
 
 class SearchPage extends StatefulWidget {
@@ -9,7 +10,6 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  final TextEditingController _searchController = TextEditingController();
   String _searchText = '';
   late final Stream<QuerySnapshot> _usersStream;
 
@@ -17,10 +17,7 @@ class _SearchPageState extends State<SearchPage> {
   void initState() {
     super.initState();
     // Initialize once to avoid repeated reads :contentReference[oaicite:2]{index=2}
-    _usersStream = FirebaseFirestore.instance
-        .collection('users')
-        .orderBy('username')
-        .snapshots();
+    _usersStream = DbService.getUsersStream();
   }
 
   @override
@@ -28,7 +25,6 @@ class _SearchPageState extends State<SearchPage> {
     return Scaffold(
       appBar: AppBar(
         title: TextField(
-          controller: _searchController,
           decoration: const InputDecoration(
             hintText: 'Search users…',
             prefixIcon: Icon(Icons.search),
@@ -46,11 +42,12 @@ class _SearchPageState extends State<SearchPage> {
             return const Center(child: CircularProgressIndicator());
           }
           final allDocs = snapshot.data!.docs;
-          final filteredDocs = allDocs.where((doc) {
-            final data = doc.data() as Map<String, dynamic>;
-            final username = (data['username'] as String).toLowerCase();
-            return username.contains(_searchText);
-          }).toList();
+          final filteredDocs =
+              allDocs.where((doc) {
+                final data = doc.data() as Map<String, dynamic>;
+                final username = (data['username'] as String).toLowerCase();
+                return username.contains(_searchText);
+              }).toList();
 
           if (filteredDocs.isEmpty) {
             return const Center(child: Text('No users found.'));
@@ -67,8 +64,8 @@ class _SearchPageState extends State<SearchPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) =>
-                          OtherProfilePage(username: data['username']),
+                      builder:
+                          (_) => OtherProfilePage(username: data['username']),
                     ),
                   );
                 },
@@ -80,4 +77,3 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 }
-

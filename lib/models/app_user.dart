@@ -6,8 +6,8 @@ class AppUser {
   final String name;
   final String about;
   final int movies;
-  final int followers;
-  final int following;
+  final List<String> followers;
+  final List<String> following;
   final int rating;
 
   AppUser({
@@ -32,8 +32,8 @@ class AppUser {
       name: map['name'],
       about: map['about'],
       movies: map['movies'] ?? 0,
-      followers: map['followers'] ?? 0,
-      following: map['following'] ?? 0,
+      followers: List<String>.from(map['followers'] ?? []),
+      following: List<String>.from(map['following'] ?? []),
       rating: map['rating'] ?? 0,
     );
   }

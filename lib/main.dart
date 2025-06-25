@@ -61,6 +61,8 @@ class MyApp extends StatelessWidget {
               //     userData.age == 0) {
               //   return const DetailsScreen();
               // }
+              // print("user data: $userData");
+
               if (userData == null) {
                 return const DetailsScreen();
               }
