@@ -111,7 +111,11 @@ class OtherProfilePage extends StatelessWidget {
                       ),
                     const SizedBox(height: 10),
                     Expanded(
-                      child: MovieGrid(movies: movies, uid: otherUserUid),
+                      child: MovieGrid(
+                        movies: movies,
+                        uid: otherUserUid,
+                        viewOnly: true,
+                      ),
                     ),
                   ],
                 ),

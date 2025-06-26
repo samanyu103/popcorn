@@ -7,12 +7,14 @@ class MoviePage extends StatefulWidget {
   final String tconst;
   final String currentUid;
   final String? otherUid;
+  final bool viewOnly;
 
   const MoviePage({
     super.key,
     required this.tconst,
     required this.currentUid,
     this.otherUid,
+    this.viewOnly = false,
   });
 
   @override
@@ -26,6 +28,8 @@ class _MoviePageState extends State<MoviePage> {
   Map<String, dynamic>? _movieData;
   Movie? _existingUserMovie;
 
+  bool get isViewOnly => widget.viewOnly;
+
   @override
   void initState() {
     super.initState();
@@ -33,11 +37,10 @@ class _MoviePageState extends State<MoviePage> {
   }
 
   Future<void> _fetchMovie() async {
+    final uid = widget.otherUid ?? widget.currentUid;
+
     final userDoc =
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(widget.currentUid)
-            .get();
+        await FirebaseFirestore.instance.collection('users').doc(uid).get();
 
     final userData = userDoc.data();
     if (userData != null && userData['movies'] != null) {
@@ -61,7 +64,6 @@ class _MoviePageState extends State<MoviePage> {
         _seen = existingMovie.seen;
         _liked = existingMovie.liked;
         _reviewController.text = existingMovie.review ?? '';
-
         setState(() {});
         return;
       }
@@ -92,6 +94,7 @@ class _MoviePageState extends State<MoviePage> {
     if (_movieData == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
+
     final name = _movieData!['name'] ?? 'Unknown';
     final poster_url = _movieData!['poster_url'] ?? '';
     final imdb_rating = _movieData!['imdb_rating'];
@@ -120,14 +123,15 @@ class _MoviePageState extends State<MoviePage> {
 
               const SizedBox(height: 24),
 
-              // Seen icon toggle
+              // Seen icon toggle (only editable if !viewOnly)
               IconButton(
                 icon: Icon(
                   _seen ? Icons.remove_red_eye : Icons.remove_red_eye_outlined,
                   size: 30,
                 ),
                 tooltip: _seen ? 'Seen' : 'Mark as seen',
-                onPressed: () => setState(() => _seen = !_seen),
+                onPressed:
+                    isViewOnly ? null : () => setState(() => _seen = !_seen),
               ),
 
               if (_seen) ...[
@@ -142,11 +146,14 @@ class _MoviePageState extends State<MoviePage> {
                         Icons.thumb_up,
                         color: _liked == true ? Colors.green : Colors.grey,
                       ),
-                      onPressed: () {
-                        setState(() {
-                          _liked = _liked == true ? null : true;
-                        });
-                      },
+                      onPressed:
+                          isViewOnly
+                              ? null
+                              : () {
+                                setState(() {
+                                  _liked = _liked == true ? null : true;
+                                });
+                              },
                     ),
                     const SizedBox(width: 16),
                     IconButton(
@@ -154,11 +161,14 @@ class _MoviePageState extends State<MoviePage> {
                         Icons.thumb_down,
                         color: _liked == false ? Colors.red : Colors.grey,
                       ),
-                      onPressed: () {
-                        setState(() {
-                          _liked = _liked == false ? null : false;
-                        });
-                      },
+                      onPressed:
+                          isViewOnly
+                              ? null
+                              : () {
+                                setState(() {
+                                  _liked = _liked == false ? null : false;
+                                });
+                              },
                     ),
                   ],
                 ),
@@ -168,8 +178,9 @@ class _MoviePageState extends State<MoviePage> {
                 // Review input
                 TextField(
                   controller: _reviewController,
+                  readOnly: isViewOnly,
                   decoration: const InputDecoration(
-                    labelText: 'Write your review...',
+                    labelText: 'review',
                     border: OutlineInputBorder(),
                   ),
                   maxLines: 4,
@@ -177,38 +188,43 @@ class _MoviePageState extends State<MoviePage> {
 
                 const SizedBox(height: 16),
 
-                // Post button
-                ElevatedButton(
-                  onPressed: () async {
-                    if (_existingUserMovie != null && !_seen) {
-                      // ❌ Seen unchecked on existing movie → remove it
-                      await DbService.removeMovieFromUser(
-                        widget.tconst,
-                        widget.currentUid,
-                      );
-                    } else if (_seen) {
-                      // ✅ Either add new or update existing
-                      final movie = Movie(
-                        tconst: widget.tconst,
-                        name: _movieData!['name'],
-                        year: _movieData!['year'],
-                        imdb_rating: _movieData!['imdb_rating'],
-                        poster_url: _movieData!['poster_url'],
-                        seen: _seen,
-                        liked: _liked,
-                        review: _reviewController.text,
-                        timeAdded:
-                            _existingUserMovie?.timeAdded ??
-                            DateTime.now(), // preserve original timeAdded
-                      );
+                // Post/Update button (only if editable)
+                if (!isViewOnly)
+                  ElevatedButton(
+                    onPressed: () async {
+                      if (_existingUserMovie != null && !_seen) {
+                        // ❌ Seen unchecked on existing movie → remove it
+                        await DbService.removeMovieFromUser(
+                          widget.tconst,
+                          widget.currentUid,
+                        );
+                      } else if (_seen) {
+                        // ✅ Add/update
+                        final movie = Movie(
+                          tconst: widget.tconst,
+                          name: _movieData!['name'],
+                          year: _movieData!['year'],
+                          imdb_rating: _movieData!['imdb_rating'],
+                          poster_url: _movieData!['poster_url'],
+                          seen: _seen,
+                          liked: _liked,
+                          review: _reviewController.text,
+                          timeAdded:
+                              _existingUserMovie?.timeAdded ?? DateTime.now(),
+                        );
 
-                      await DbService.addMovieToUser(movie, widget.currentUid);
-                    }
+                        await DbService.addMovieToUser(
+                          movie,
+                          widget.currentUid,
+                        );
+                      }
 
-                    Navigator.pushReplacementNamed(context, '/home');
-                  },
-                  child: Text(_existingUserMovie != null ? 'Update' : 'Post'),
-                ),
+                      if (context.mounted) {
+                        Navigator.pushReplacementNamed(context, '/home');
+                      }
+                    },
+                    child: Text(_existingUserMovie != null ? 'Update' : 'Post'),
+                  ),
               ],
             ],
           ),

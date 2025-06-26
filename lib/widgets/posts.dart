@@ -5,7 +5,13 @@ import '../screens/movie_page.dart'; // Adjust the import path if needed
 class MovieGrid extends StatelessWidget {
   final List<Movie> movies;
   final String uid;
-  const MovieGrid({super.key, required this.movies, required this.uid});
+  final bool viewOnly;
+  const MovieGrid({
+    super.key,
+    required this.movies,
+    required this.uid,
+    this.viewOnly = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +42,11 @@ class MovieGrid extends StatelessWidget {
               context,
               MaterialPageRoute(
                 builder:
-                    (_) => MoviePage(tconst: movie.tconst, currentUid: uid),
+                    (_) => MoviePage(
+                      tconst: movie.tconst,
+                      currentUid: uid,
+                      viewOnly: viewOnly,
+                    ),
               ),
             );
           },
