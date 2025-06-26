@@ -1,3 +1,5 @@
+import 'movie.dart';
+
 class AppUser {
   final String uid;
   final String email;
@@ -5,7 +7,7 @@ class AppUser {
   final String? profilePicture;
   final String name;
   final String about;
-  final int movies;
+  final List<Movie> movies;
   final List<String> followers;
   final List<String> following;
   final int rating;
@@ -31,7 +33,10 @@ class AppUser {
       profilePicture: map['profile_picture'],
       name: map['name'],
       about: map['about'],
-      movies: map['movies'] ?? 0,
+      movies:
+          (map['movies'] as List<dynamic>? ?? [])
+              .map((movieMap) => Movie.fromMap(movieMap))
+              .toList(),
       followers: List<String>.from(map['followers'] ?? []),
       following: List<String>.from(map['following'] ?? []),
       rating: map['rating'] ?? 0,
@@ -46,7 +51,7 @@ class AppUser {
       'profile_picture': profilePicture,
       'name': name,
       'about': about,
-      'movies': movies,
+      'movies': movies.map((movie) => movie.toMap()).toList(),
       'followers': followers,
       'following': following,
       'rating': rating,

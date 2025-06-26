@@ -17,7 +17,7 @@ class UserProfileInfo extends StatelessWidget {
     final username = user['username'] ?? '';
     final name = user['name'] ?? '';
     final about = user['about'] ?? '';
-    final movies = user['movies'] ?? 0;
+    final movieCount = (user['movies'] as List?)?.length ?? 0;
     final followers = List<String>.from(user['followers'] ?? []);
     final following = List<String>.from(user['following'] ?? []);
     final rating = user['rating'] ?? 0;
@@ -58,7 +58,7 @@ class UserProfileInfo extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _StatItem(label: 'Movies', value: movies.toString()),
+                    _StatItem(label: 'Movies', value: movieCount.toString()),
                     GestureDetector(
                       onTap: () {
                         Navigator.push(

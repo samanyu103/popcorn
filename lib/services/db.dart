@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/app_user.dart';
+import '../models/movie.dart';
 
 class DbService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -45,7 +46,7 @@ class DbService {
       'name': name,
       'about': about,
       'profile_picture': profilePicture,
-      'movies': 0,
+      'movies': [],
       'followers': [],
       'following': [],
       'rating': 0,
@@ -64,5 +65,18 @@ class DbService {
         .collection('users')
         .orderBy('username')
         .snapshots();
+  }
+
+  static Future<void> addMovieToUser(Movie movie, String uid) async {
+    final userDoc = FirebaseFirestore.instance.collection('users').doc(uid);
+
+    try {
+      await userDoc.update({
+        'movies': FieldValue.arrayUnion([movie.toMap()]),
+      });
+      print('Movie added to user profile!');
+    } catch (e) {
+      print('Error adding movie: $e');
+    }
   }
 }

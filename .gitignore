@@ -43,3 +43,8 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+
+#  large imdb datasets
+/scraping/title.basics.tsv
+/scraping/title.ratings.tsv

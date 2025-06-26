@@ -8,6 +8,7 @@ import 'screens/signup.dart';
 import 'screens/details.dart';
 import 'screens/home.dart';
 import 'screens/search.dart';
+import 'screens/search_movies.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,6 +30,7 @@ class MyApp extends StatelessWidget {
         '/details': (_) => const DetailsScreen(),
         '/home': (_) => const HomeScreen(),
         '/search': (_) => const SearchPage(),
+        '/movies_search': (_) => const MoviesSearchPage(),
       },
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
