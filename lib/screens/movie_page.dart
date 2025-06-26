@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/db.dart';
 import '../models/movie.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class MoviePage extends StatefulWidget {
   final String tconst;
@@ -25,6 +24,7 @@ class _MoviePageState extends State<MoviePage> {
   bool? _liked; // null = no choice, true = liked, false = disliked
   final TextEditingController _reviewController = TextEditingController();
   Map<String, dynamic>? _movieData;
+  Movie? _existingUserMovie;
 
   @override
   void initState() {
@@ -33,17 +33,52 @@ class _MoviePageState extends State<MoviePage> {
   }
 
   Future<void> _fetchMovie() async {
-    final doc =
+    final userDoc =
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(widget.currentUid)
+            .get();
+
+    final userData = userDoc.data();
+    if (userData != null && userData['movies'] != null) {
+      final moviesList = List<Map<String, dynamic>>.from(userData['movies']);
+      final match = moviesList.firstWhere(
+        (m) => m['tconst'] == widget.tconst,
+        orElse: () => {},
+      );
+
+      if (match.isNotEmpty) {
+        final existingMovie = Movie.fromMap(match);
+        _existingUserMovie = existingMovie;
+
+        _movieData = {
+          'name': existingMovie.name,
+          'poster_url': existingMovie.poster_url,
+          'imdb_rating': existingMovie.imdb_rating,
+          'year': existingMovie.year,
+        };
+
+        _seen = existingMovie.seen;
+        _liked = existingMovie.liked;
+        _reviewController.text = existingMovie.review ?? '';
+
+        setState(() {});
+        return;
+      }
+    }
+
+    // Fallback to global movie collection if not in user list
+    final movieDoc =
         await FirebaseFirestore.instance
             .collection('movies')
             .doc(widget.tconst)
             .get();
 
-    if (doc.exists) {
-      setState(() {
-        _movieData = doc.data();
-      });
+    if (movieDoc.exists) {
+      _movieData = movieDoc.data();
     }
+
+    setState(() {});
   }
 
   @override
@@ -145,22 +180,34 @@ class _MoviePageState extends State<MoviePage> {
                 // Post button
                 ElevatedButton(
                   onPressed: () async {
-                    final movie = Movie(
-                      tconst: widget.tconst,
-                      name: name,
-                      year: year,
-                      imdb_rating: imdb_rating,
-                      poster_url: poster_url,
-                      seen: _seen,
-                      liked: _liked,
-                      review: _reviewController.text,
-                      timeAdded: DateTime.now(),
-                    );
+                    if (_existingUserMovie != null && !_seen) {
+                      // ❌ Seen unchecked on existing movie → remove it
+                      await DbService.removeMovieFromUser(
+                        widget.tconst,
+                        widget.currentUid,
+                      );
+                    } else if (_seen) {
+                      // ✅ Either add new or update existing
+                      final movie = Movie(
+                        tconst: widget.tconst,
+                        name: _movieData!['name'],
+                        year: _movieData!['year'],
+                        imdb_rating: _movieData!['imdb_rating'],
+                        poster_url: _movieData!['poster_url'],
+                        seen: _seen,
+                        liked: _liked,
+                        review: _reviewController.text,
+                        timeAdded:
+                            _existingUserMovie?.timeAdded ??
+                            DateTime.now(), // preserve original timeAdded
+                      );
 
-                    await DbService.addMovieToUser(movie, widget.currentUid);
+                      await DbService.addMovieToUser(movie, widget.currentUid);
+                    }
+
                     Navigator.pushReplacementNamed(context, '/home');
                   },
-                  child: const Text('Post'),
+                  child: Text(_existingUserMovie != null ? 'Update' : 'Post'),
                 ),
               ],
             ],

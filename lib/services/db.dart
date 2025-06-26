@@ -68,15 +68,49 @@ class DbService {
   }
 
   static Future<void> addMovieToUser(Movie movie, String uid) async {
-    final userDoc = FirebaseFirestore.instance.collection('users').doc(uid);
+    final userDocRef = FirebaseFirestore.instance.collection('users').doc(uid);
 
     try {
-      await userDoc.update({
-        'movies': FieldValue.arrayUnion([movie.toMap()]),
-      });
-      print('Movie added to user profile!');
+      final userSnapshot = await userDocRef.get();
+      final userData = userSnapshot.data();
+
+      if (userData == null) {
+        print('User not found.');
+        return;
+      }
+
+      List<Map<String, dynamic>> movies = List<Map<String, dynamic>>.from(
+        userData['movies'] ?? [],
+      );
+
+      final index = movies.indexWhere((m) => m['tconst'] == movie.tconst);
+
+      if (index != -1) {
+        // ✅ Replace existing movie
+        movies[index] = movie.toMap();
+      } else {
+        // ➕ Add new movie
+        movies.add(movie.toMap());
+      }
+
+      await userDocRef.update({'movies': movies});
+      print('Movie saved successfully!');
     } catch (e) {
-      print('Error adding movie: $e');
+      print('Error saving movie: $e');
+    }
+  }
+
+  static Future<void> removeMovieFromUser(String tconst, String uid) async {
+    final userDocRef = FirebaseFirestore.instance.collection('users').doc(uid);
+    final userDoc = await userDocRef.get();
+    final userData = userDoc.data();
+
+    if (userData != null && userData['movies'] != null) {
+      final moviesList = List<Map<String, dynamic>>.from(userData['movies']);
+      final updatedList =
+          moviesList.where((m) => m['tconst'] != tconst).toList();
+
+      await userDocRef.update({'movies': updatedList});
     }
   }
 }
