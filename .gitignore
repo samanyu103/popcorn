@@ -48,3 +48,6 @@ app.*.map.json
 #  large imdb datasets
 /scraping/title.basics.tsv
 /scraping/title.ratings.tsv
+
+# keys
+/scraping/popcorn-a42fa-firebase-adminsdk-fbsvc-6df305ad4b.json
