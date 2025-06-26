@@ -67,7 +67,7 @@ class HomeScreen extends StatelessWidget {
             children: [
               UserProfileInfo(user: user),
               const SizedBox(height: 10),
-              Expanded(child: MovieGrid(movies: movies)),
+              Expanded(child: MovieGrid(movies: movies, uid: user['uid'])),
             ],
           );
         },

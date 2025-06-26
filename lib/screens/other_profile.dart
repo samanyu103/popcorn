@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import '../models/movie.dart';
 import '../widgets/user_profile_info.dart';
+import '../widgets/posts.dart';
 
 class OtherProfilePage extends StatelessWidget {
   final String username;
@@ -92,6 +93,9 @@ class OtherProfilePage extends StatelessWidget {
             final isFollowing =
                 currentUser != null && followers.contains(currentUser.uid);
 
+            final rawMovies = user['movies'] as List<dynamic>? ?? [];
+            final movies = rawMovies.map((m) => Movie.fromMap(m)).toList();
+
             return Scaffold(
               appBar: AppBar(title: Text("$username's Profile")),
               body: Center(
@@ -105,6 +109,10 @@ class OtherProfilePage extends StatelessWidget {
                         onPressed: () => _toggleFollow(user),
                         child: Text(isFollowing ? 'Unfollow' : 'Follow'),
                       ),
+                    const SizedBox(height: 10),
+                    Expanded(
+                      child: MovieGrid(movies: movies, uid: otherUserUid),
+                    ),
                   ],
                 ),
               ),

@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import '../models/movie.dart';
 import '../screens/movie_page.dart'; // Adjust the import path if needed
-import 'package:firebase_auth/firebase_auth.dart';
 
 class MovieGrid extends StatelessWidget {
   final List<Movie> movies;
-  const MovieGrid({super.key, required this.movies});
+  final String uid;
+  const MovieGrid({super.key, required this.movies, required this.uid});
 
   @override
   Widget build(BuildContext context) {
     // final sortedMovies = List<Movie>.from(movies)
     //   ..sort((a, b) => b.timeAdded.compareTo(a.timeAdded));
-    final currentUid = FirebaseAuth.instance.currentUser!.uid;
-
     return GridView.builder(
       padding: const EdgeInsets.all(8),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -38,8 +36,7 @@ class MovieGrid extends StatelessWidget {
               context,
               MaterialPageRoute(
                 builder:
-                    (_) =>
-                        MoviePage(tconst: movie.tconst, currentUid: currentUid),
+                    (_) => MoviePage(tconst: movie.tconst, currentUid: uid),
               ),
             );
           },
