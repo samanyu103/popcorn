@@ -183,6 +183,7 @@ class _MoviePageState extends State<MoviePage> {
                     decoration: const InputDecoration(
                       labelText: 'review',
                       border: OutlineInputBorder(),
+                      floatingLabelBehavior: FloatingLabelBehavior.always,
                     ),
                     maxLines: 4,
                   ),

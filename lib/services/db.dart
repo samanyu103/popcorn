@@ -113,4 +113,24 @@ class DbService {
       await userDocRef.update({'movies': updatedList});
     }
   }
+
+  static Future<List<Movie>> getUserMovies(String uid) async {
+    try {
+      final docSnapshot =
+          await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      if (!docSnapshot.exists) return [];
+
+      final data = docSnapshot.data();
+      if (data == null || !data.containsKey('movies')) return [];
+
+      final moviesData = List<Map<String, dynamic>>.from(
+        data['movies'].map((e) => Map<String, dynamic>.from(e)),
+      );
+
+      return moviesData.map((movieMap) => Movie.fromMap(movieMap)).toList();
+    } catch (e) {
+      print('Error fetching movies for user $uid: $e');
+      return [];
+    }
+  }
 }

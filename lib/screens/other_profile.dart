@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/movie.dart';
 import '../widgets/user_profile_info.dart';
-import '../widgets/posts.dart';
+import '../widgets/symmetric_difference.dart';
 
 class OtherProfilePage extends StatelessWidget {
   final String username;
@@ -88,6 +88,7 @@ class OtherProfilePage extends StatelessWidget {
             }
 
             final user = snapshot.data!.data() as Map<String, dynamic>;
+            print("current user $currentUser, other user $user");
             final otherUserUid = user['uid'];
             final followers = List<String>.from(user['followers'] ?? []);
             final isFollowing =
@@ -111,10 +112,9 @@ class OtherProfilePage extends StatelessWidget {
                       ),
                     const SizedBox(height: 10),
                     Expanded(
-                      child: MovieGrid(
-                        movies: movies,
-                        uid: otherUserUid,
-                        viewOnly: true,
+                      child: CompareMoviesWidget(
+                        currentUid: currentUser!.uid,
+                        otherUid: otherUserUid,
                       ),
                     ),
                   ],
