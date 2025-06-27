@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/app_user.dart';
 import '../models/movie.dart';
+import '../models/popcorn.dart';
 
 class DbService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -50,6 +51,10 @@ class DbService {
       'followers': [],
       'following': [],
       'rating': 0,
+      'incomingPopcorns': [],
+      'outgoingPopcorns': [],
+      'incomingRequests': [],
+      'outgoingRequests': [],
     });
   }
 
@@ -132,5 +137,129 @@ class DbService {
       print('Error fetching movies for user $uid: $e');
       return [];
     }
+  }
+
+  static Future<void> requestPopcorn({
+    required String fromUid,
+    required String toUid,
+  }) async {
+    final fromDoc = FirebaseFirestore.instance.collection('users').doc(fromUid);
+    final toDoc = FirebaseFirestore.instance.collection('users').doc(toUid);
+
+    try {
+      // Add to outgoingRequests of requester
+      await fromDoc.update({
+        'outgoingRequests': FieldValue.arrayUnion([toUid]),
+      });
+
+      // Add to incomingRequests of receiver
+      await toDoc.update({
+        'incomingRequests': FieldValue.arrayUnion([fromUid]),
+      });
+
+      print('Popcorn request sent!');
+    } catch (e) {
+      print('Error requesting popcorn: $e');
+    }
+  }
+
+  static Future<Movie?> getMovieUser(String uid, String tconst) async {
+    final userDoc =
+        await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    final userData = userDoc.data();
+
+    if (userData != null && userData['movies'] != null) {
+      final moviesList = List<Map<String, dynamic>>.from(userData['movies']);
+      final match = moviesList.firstWhere(
+        (m) => m['tconst'] == tconst,
+        orElse: () => {},
+      );
+
+      if (match.isNotEmpty) {
+        return Movie.fromMap(match);
+      }
+    }
+
+    return null;
+  }
+
+  static Future<List<Movie>> getSeenByANotB(String aUid, String bUid) async {
+    final aDoc =
+        await FirebaseFirestore.instance.collection('users').doc(aUid).get();
+    final bDoc =
+        await FirebaseFirestore.instance.collection('users').doc(bUid).get();
+
+    if (!aDoc.exists || !bDoc.exists) return [];
+
+    final aMovies = List<Map<String, dynamic>>.from(aDoc['movies'] ?? []);
+    final bMovies = List<Map<String, dynamic>>.from(bDoc['movies'] ?? []);
+
+    final bTconsts = bMovies.map((m) => m['tconst']).toSet();
+
+    return aMovies
+        .where((m) => !bTconsts.contains(m['tconst']))
+        .map((m) => Movie.fromMap(m))
+        .toList();
+  }
+
+  static Future<Map<String, dynamic>?> fetchMovieAndUser(
+    Popcorn popcorn,
+  ) async {
+    try {
+      final fromDoc =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(popcorn.fromUid)
+              .get();
+      final toDoc =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(popcorn.toUid)
+              .get();
+
+      if (!fromDoc.exists || !toDoc.exists) return null;
+
+      final fromData = fromDoc.data();
+      final toData = toDoc.data();
+
+      final fromUsername = fromData?['username'] ?? 'unknown';
+      final toUsername = toData?['username'] ?? 'unknown';
+
+      final movies = List<Map<String, dynamic>>.from(fromData?['movies'] ?? []);
+      final movie = movies.firstWhere(
+        (m) => m['tconst'] == popcorn.tconst,
+        orElse: () => {},
+      );
+
+      if (movie.isEmpty) return null;
+
+      return {
+        'fromUsername': fromUsername,
+        'toUsername': toUsername,
+        'movie': movie,
+      };
+    } catch (e) {
+      print('Error: $e');
+      return null;
+    }
+  }
+
+  static Future<void> removeFromIncomingPopcorn(
+    String tconst,
+    String uid,
+  ) async {
+    final userRef = FirebaseFirestore.instance.collection('users').doc(uid);
+    final userSnap = await userRef.get();
+
+    if (!userSnap.exists) return;
+
+    final data = userSnap.data();
+    final List<dynamic> incoming = data?['incomingPopcorns'] ?? [];
+
+    // Find the matching popcorn(s)
+    final updatedIncoming = List<Map<String, dynamic>>.from(incoming)
+      ..removeWhere((pop) => pop['tconst'] == tconst);
+
+    await userRef.update({'incomingPopcorns': updatedIncoming});
   }
 }

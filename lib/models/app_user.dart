@@ -1,4 +1,5 @@
 import 'movie.dart';
+import 'popcorn.dart';
 
 class AppUser {
   final String uid;
@@ -12,6 +13,11 @@ class AppUser {
   final List<String> following;
   final int rating;
 
+  final List<Popcorn> incomingPopcorns;
+  final List<Popcorn> outgoingPopcorns;
+  final List<String> incomingRequests;
+  final List<String> outgoingRequests;
+
   AppUser({
     required this.uid,
     required this.email,
@@ -23,6 +29,10 @@ class AppUser {
     required this.followers,
     required this.following,
     required this.rating,
+    required this.incomingPopcorns,
+    required this.outgoingPopcorns,
+    required this.incomingRequests,
+    required this.outgoingRequests,
   });
 
   factory AppUser.fromMap(Map<String, dynamic> map) {
@@ -40,6 +50,16 @@ class AppUser {
       followers: List<String>.from(map['followers'] ?? []),
       following: List<String>.from(map['following'] ?? []),
       rating: map['rating'] ?? 0,
+      incomingPopcorns:
+          (map['incomingPopcorns'] as List<dynamic>? ?? [])
+              .map((p) => Popcorn.fromMap(p))
+              .toList(),
+      outgoingPopcorns:
+          (map['outgoingPopcorns'] as List<dynamic>? ?? [])
+              .map((p) => Popcorn.fromMap(p))
+              .toList(),
+      incomingRequests: List<String>.from(map['incomingRequests'] ?? []),
+      outgoingRequests: List<String>.from(map['outgoingRequests'] ?? []),
     );
   }
 
@@ -55,6 +75,10 @@ class AppUser {
       'followers': followers,
       'following': following,
       'rating': rating,
+      'incomingPopcorns': incomingPopcorns.map((p) => p.toMap()).toList(),
+      'outgoingPopcorns': outgoingPopcorns.map((p) => p.toMap()).toList(),
+      'incomingRequests': incomingRequests,
+      'outgoingRequests': outgoingRequests,
     };
   }
 }

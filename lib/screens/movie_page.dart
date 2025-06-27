@@ -23,10 +23,14 @@ class MoviePage extends StatefulWidget {
 
 class _MoviePageState extends State<MoviePage> {
   bool _seen = false;
-  bool? _liked; // null = no choice, true = liked, false = disliked
+  bool? _liked;
+  bool? otherliked;
+  String? otherreview;
   final TextEditingController _reviewController = TextEditingController();
   Map<String, dynamic>? _movieData;
   Movie? _existingUserMovie;
+  bool foundincuruserdb = false;
+  bool foundinotheruserdb = false;
 
   bool get isViewOnly => widget.viewOnly;
 
@@ -37,39 +41,45 @@ class _MoviePageState extends State<MoviePage> {
   }
 
   Future<void> _fetchMovie() async {
-    final uid = widget.otherUid ?? widget.currentUid;
+    final cuid = widget.currentUid;
+    final ouid = widget.otherUid;
+    final tconst = widget.tconst;
 
-    final userDoc =
-        await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    final userMovie = await DbService.getMovieUser(cuid, tconst);
+    if (userMovie != null) {
+      foundincuruserdb = true;
+      _existingUserMovie = userMovie;
+      _movieData = {
+        'name': userMovie.name,
+        'poster_url': userMovie.poster_url,
+        'imdb_rating': userMovie.imdb_rating,
+        'year': userMovie.year,
+      };
+      _seen = userMovie.seen;
+      _liked = userMovie.liked;
+      _reviewController.text = userMovie.review ?? '';
+      setState(() {});
+      return;
+    }
 
-    final userData = userDoc.data();
-    if (userData != null && userData['movies'] != null) {
-      final moviesList = List<Map<String, dynamic>>.from(userData['movies']);
-      final match = moviesList.firstWhere(
-        (m) => m['tconst'] == widget.tconst,
-        orElse: () => {},
-      );
-
-      if (match.isNotEmpty) {
-        final existingMovie = Movie.fromMap(match);
-        _existingUserMovie = existingMovie;
-
+    if (ouid != null) {
+      final otherMovie = await DbService.getMovieUser(ouid, tconst);
+      if (otherMovie != null) {
+        foundinotheruserdb = true;
+        _existingUserMovie = otherMovie;
         _movieData = {
-          'name': existingMovie.name,
-          'poster_url': existingMovie.poster_url,
-          'imdb_rating': existingMovie.imdb_rating,
-          'year': existingMovie.year,
+          'name': otherMovie.name,
+          'poster_url': otherMovie.poster_url,
+          'imdb_rating': otherMovie.imdb_rating,
+          'year': otherMovie.year,
         };
-
-        _seen = existingMovie.seen;
-        _liked = existingMovie.liked;
-        _reviewController.text = existingMovie.review ?? '';
+        otherliked = otherMovie.liked;
+        otherreview = otherMovie.review ?? '';
         setState(() {});
         return;
       }
     }
 
-    // Fallback to global movie collection if not in user list
     final movieDoc =
         await FirebaseFirestore.instance
             .collection('movies')
@@ -96,8 +106,8 @@ class _MoviePageState extends State<MoviePage> {
     }
 
     final name = _movieData!['name'] ?? 'Unknown';
-    final poster_url = _movieData!['poster_url'] ?? '';
-    final imdb_rating = _movieData!['imdb_rating'];
+    final posterUrl = _movieData!['poster_url'] ?? '';
+    final imdbRating = _movieData!['imdb_rating'];
     final year = _movieData!['year'];
 
     return Scaffold(
@@ -108,22 +118,19 @@ class _MoviePageState extends State<MoviePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Poster image
-              poster_url.isNotEmpty
-                  ? Image.network(poster_url, height: 300)
+              posterUrl.isNotEmpty
+                  ? Image.network(posterUrl, height: 300)
                   : const Icon(Icons.broken_image, size: 150),
 
               const SizedBox(height: 16),
 
-              // Year and IMDb Rating
               Text(
-                'Year: $year • IMDb Rating: $imdb_rating',
+                'Year: $year • IMDb Rating: $imdbRating',
                 style: const TextStyle(fontSize: 16),
               ),
 
               const SizedBox(height: 24),
 
-              // Seen icon toggle (only editable if !viewOnly)
               IconButton(
                 icon: Icon(
                   _seen ? Icons.remove_red_eye : Icons.remove_red_eye_outlined,
@@ -134,92 +141,93 @@ class _MoviePageState extends State<MoviePage> {
                     isViewOnly ? null : () => setState(() => _seen = !_seen),
               ),
 
-              ...[
-                if (_seen) ...[
-                  const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-                  // Like / Dislike toggle
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          Icons.thumb_up,
-                          color: _liked == true ? Colors.green : Colors.grey,
-                        ),
-                        onPressed:
-                            isViewOnly
-                                ? null
-                                : () {
-                                  setState(() {
-                                    _liked = _liked == true ? null : true;
-                                  });
-                                },
+              if (_seen) ...[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        Icons.thumb_up,
+                        color: _liked == true ? Colors.green : Colors.grey,
                       ),
-                      const SizedBox(width: 16),
-                      IconButton(
-                        icon: Icon(
-                          Icons.thumb_down,
-                          color: _liked == false ? Colors.red : Colors.grey,
-                        ),
-                        onPressed:
-                            isViewOnly
-                                ? null
-                                : () {
-                                  setState(() {
-                                    _liked = _liked == false ? null : false;
-                                  });
-                                },
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Review input
-                  TextField(
-                    controller: _reviewController,
-                    readOnly: isViewOnly,
-                    decoration: const InputDecoration(
-                      labelText: 'review',
-                      border: OutlineInputBorder(),
-                      floatingLabelBehavior: FloatingLabelBehavior.always,
+                      onPressed:
+                          isViewOnly
+                              ? null
+                              : () {
+                                setState(() {
+                                  _liked = _liked == true ? null : true;
+                                });
+                              },
                     ),
-                    maxLines: 4,
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  if (!isViewOnly)
-                    ElevatedButton(
-                      onPressed: () async {
-                        final movie = Movie(
-                          tconst: widget.tconst,
-                          name: _movieData!['name'],
-                          year: _movieData!['year'],
-                          imdb_rating: _movieData!['imdb_rating'],
-                          poster_url: _movieData!['poster_url'],
-                          seen: _seen,
-                          liked: _liked,
-                          review: _reviewController.text,
-                          timeAdded:
-                              _existingUserMovie?.timeAdded ?? DateTime.now(),
-                        );
-
-                        await DbService.addMovieToUser(
-                          movie,
-                          widget.currentUid,
-                        );
-                        if (context.mounted) {
-                          Navigator.pushReplacementNamed(context, '/home');
-                        }
-                      },
-                      child: Text(
-                        _existingUserMovie != null ? 'Update' : 'Post',
+                    const SizedBox(width: 16),
+                    IconButton(
+                      icon: Icon(
+                        Icons.thumb_down,
+                        color: _liked == false ? Colors.red : Colors.grey,
                       ),
+                      onPressed:
+                          isViewOnly
+                              ? null
+                              : () {
+                                setState(() {
+                                  _liked = _liked == false ? null : false;
+                                });
+                              },
                     ),
-                ] else if (!isViewOnly && _existingUserMovie != null) ...[
-                  // Show "Remove" button if previously seen but now unchecked
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                TextField(
+                  controller: _reviewController,
+                  readOnly: isViewOnly,
+                  decoration: const InputDecoration(
+                    labelText: 'review',
+                    border: OutlineInputBorder(),
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                  ),
+                  maxLines: 4,
+                ),
+
+                const SizedBox(height: 16),
+
+                if (!isViewOnly)
+                  ElevatedButton(
+                    onPressed: () async {
+                      final movie = Movie(
+                        tconst: widget.tconst,
+                        name: _movieData!['name'],
+                        year: _movieData!['year'],
+                        imdb_rating: _movieData!['imdb_rating'],
+                        poster_url: _movieData!['poster_url'],
+                        seen: _seen,
+                        liked: _liked,
+                        review: _reviewController.text,
+                        timeAdded:
+                            foundincuruserdb
+                                ? _existingUserMovie?.timeAdded ??
+                                    DateTime.now()
+                                : DateTime.now(),
+                      );
+
+                      await DbService.addMovieToUser(movie, widget.currentUid);
+                      // remove from incoming popcorn
+                      await DbService.removeFromIncomingPopcorn(
+                        widget.tconst,
+                        widget.currentUid,
+                      );
+                      // ratings
+
+                      if (context.mounted) {
+                        Navigator.pushReplacementNamed(context, '/home');
+                      }
+                    },
+                    child: Text(foundincuruserdb ? 'Update' : 'Post'),
+                  ),
+              ] else ...[
+                if (!isViewOnly && foundincuruserdb)
                   ElevatedButton(
                     onPressed: () async {
                       await DbService.removeMovieFromUser(
@@ -231,6 +239,47 @@ class _MoviePageState extends State<MoviePage> {
                       }
                     },
                     child: const Text('Remove'),
+                  ),
+
+                if (foundinotheruserdb) ...[
+                  // const SizedBox(height: 20),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 👍👎 Icons
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.thumb_up,
+                            color:
+                                otherliked == true ? Colors.green : Colors.grey,
+                          ),
+                          const SizedBox(width: 20),
+                          Icon(
+                            Icons.thumb_down,
+                            color:
+                                otherliked == false ? Colors.red : Colors.grey,
+                          ),
+                        ],
+                      ),
+
+                      // Review box if available
+                      if (otherreview != null &&
+                          otherreview!.trim().isNotEmpty) ...[
+                        const SizedBox(height: 16),
+                        TextField(
+                          readOnly: true,
+                          controller: TextEditingController(text: otherreview),
+                          decoration: const InputDecoration(
+                            labelText: 'review',
+                            border: OutlineInputBorder(),
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
+                          ),
+                          maxLines: 4,
+                        ),
+                      ],
+                    ],
                   ),
                 ],
               ],

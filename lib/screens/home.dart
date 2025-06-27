@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import '../services/auth.dart';
 import '../widgets/user_profile_info.dart';
 import '../models/movie.dart';
@@ -16,6 +15,9 @@ class HomeScreen extends StatelessWidget {
     }
     if (index == 2) {
       Navigator.pushNamed(context, '/search');
+    }
+    if (index == 3) {
+      Navigator.pushNamed(context, '/popcorn');
     }
   }
 
@@ -73,6 +75,7 @@ class HomeScreen extends StatelessWidget {
         },
       ),
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
         currentIndex: 0,
         onTap: (index) => _onNavTapped(context, index),
         items: const [
@@ -82,6 +85,10 @@ class HomeScreen extends StatelessWidget {
             label: 'Post',
           ),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+          BottomNavigationBarItem(
+            icon: Text('🍿', style: TextStyle(fontSize: 24)),
+            label: 'Popcorn',
+          ),
         ],
       ),
     );
