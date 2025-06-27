@@ -54,6 +54,17 @@ class _MoviesSearchPageState extends State<MoviesSearchPage> {
             return const Center(child: Text('No movies found.'));
           }
 
+          // descending order of imdb rating
+          filteredDocs.sort((a, b) {
+            final dataA = a.data() as Map<String, dynamic>?;
+            final dataB = b.data() as Map<String, dynamic>?;
+
+            final ratingA = (dataA?['imdb_rating'] ?? 0).toDouble();
+            final ratingB = (dataB?['imdb_rating'] ?? 0).toDouble();
+
+            return ratingB.compareTo(ratingA); // descending order
+          });
+
           return GridView.builder(
             padding: const EdgeInsets.all(8),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

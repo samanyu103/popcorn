@@ -134,72 +134,64 @@ class _MoviePageState extends State<MoviePage> {
                     isViewOnly ? null : () => setState(() => _seen = !_seen),
               ),
 
-              if (_seen) ...[
-                const SizedBox(height: 20),
+              ...[
+                if (_seen) ...[
+                  const SizedBox(height: 20),
 
-                // Like / Dislike toggle
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      icon: Icon(
-                        Icons.thumb_up,
-                        color: _liked == true ? Colors.green : Colors.grey,
+                  // Like / Dislike toggle
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          Icons.thumb_up,
+                          color: _liked == true ? Colors.green : Colors.grey,
+                        ),
+                        onPressed:
+                            isViewOnly
+                                ? null
+                                : () {
+                                  setState(() {
+                                    _liked = _liked == true ? null : true;
+                                  });
+                                },
                       ),
-                      onPressed:
-                          isViewOnly
-                              ? null
-                              : () {
-                                setState(() {
-                                  _liked = _liked == true ? null : true;
-                                });
-                              },
-                    ),
-                    const SizedBox(width: 16),
-                    IconButton(
-                      icon: Icon(
-                        Icons.thumb_down,
-                        color: _liked == false ? Colors.red : Colors.grey,
+                      const SizedBox(width: 16),
+                      IconButton(
+                        icon: Icon(
+                          Icons.thumb_down,
+                          color: _liked == false ? Colors.red : Colors.grey,
+                        ),
+                        onPressed:
+                            isViewOnly
+                                ? null
+                                : () {
+                                  setState(() {
+                                    _liked = _liked == false ? null : false;
+                                  });
+                                },
                       ),
-                      onPressed:
-                          isViewOnly
-                              ? null
-                              : () {
-                                setState(() {
-                                  _liked = _liked == false ? null : false;
-                                });
-                              },
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 16),
-
-                // Review input
-                TextField(
-                  controller: _reviewController,
-                  readOnly: isViewOnly,
-                  decoration: const InputDecoration(
-                    labelText: 'review',
-                    border: OutlineInputBorder(),
+                    ],
                   ),
-                  maxLines: 4,
-                ),
 
-                const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-                // Post/Update button (only if editable)
-                if (!isViewOnly)
-                  ElevatedButton(
-                    onPressed: () async {
-                      if (_existingUserMovie != null && !_seen) {
-                        // ❌ Seen unchecked on existing movie → remove it
-                        await DbService.removeMovieFromUser(
-                          widget.tconst,
-                          widget.currentUid,
-                        );
-                      } else if (_seen) {
-                        // ✅ Add/update
+                  // Review input
+                  TextField(
+                    controller: _reviewController,
+                    readOnly: isViewOnly,
+                    decoration: const InputDecoration(
+                      labelText: 'review',
+                      border: OutlineInputBorder(),
+                    ),
+                    maxLines: 4,
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  if (!isViewOnly)
+                    ElevatedButton(
+                      onPressed: () async {
                         final movie = Movie(
                           tconst: widget.tconst,
                           name: _movieData!['name'],
@@ -217,14 +209,29 @@ class _MoviePageState extends State<MoviePage> {
                           movie,
                           widget.currentUid,
                         );
-                      }
-
+                        if (context.mounted) {
+                          Navigator.pushReplacementNamed(context, '/home');
+                        }
+                      },
+                      child: Text(
+                        _existingUserMovie != null ? 'Update' : 'Post',
+                      ),
+                    ),
+                ] else if (!isViewOnly && _existingUserMovie != null) ...[
+                  // Show "Remove" button if previously seen but now unchecked
+                  ElevatedButton(
+                    onPressed: () async {
+                      await DbService.removeMovieFromUser(
+                        widget.tconst,
+                        widget.currentUid,
+                      );
                       if (context.mounted) {
                         Navigator.pushReplacementNamed(context, '/home');
                       }
                     },
-                    child: Text(_existingUserMovie != null ? 'Update' : 'Post'),
+                    child: const Text('Remove'),
                   ),
+                ],
               ],
             ],
           ),
