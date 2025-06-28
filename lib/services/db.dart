@@ -33,7 +33,9 @@ class DbService {
     return result.docs.isNotEmpty;
   }
 
-  Future<void> saveUserProfile({
+  // DbService.dart
+
+  Future<void> createUserProfile({
     required String uid,
     required String email,
     required String username,
@@ -56,6 +58,21 @@ class DbService {
       'outgoingPopcorns': [],
       'incomingRequests': [],
       'outgoingRequests': [],
+    });
+  }
+
+  Future<void> updateUserProfile({
+    required String uid,
+    required String username,
+    required String name,
+    required String about,
+    required String? profilePicture,
+  }) async {
+    await FirebaseFirestore.instance.collection('users').doc(uid).update({
+      'username': username,
+      'name': name,
+      'about': about,
+      'profile_picture': profilePicture,
     });
   }
 
