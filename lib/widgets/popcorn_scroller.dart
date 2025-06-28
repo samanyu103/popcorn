@@ -22,7 +22,8 @@ class PopcornScroller extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         itemCount: popcorns.length,
         itemBuilder: (context, index) {
-          final popcorn = popcorns[index];
+          // newest first
+          final popcorn = popcorns[popcorns.length - 1 - index];
           return FutureBuilder<Map<String, dynamic>?>(
             future: DbService.fetchMovieAndUser(popcorn),
             builder: (context, snapshot) {

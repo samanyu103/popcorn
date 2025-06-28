@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../screens/following.dart';
 import '../screens/followers.dart';
+import '../screens/ratings.dart';
+import '../models/rating.dart';
 
 class UserProfileInfo extends StatelessWidget {
   final Map<String, dynamic> user;
@@ -20,9 +22,10 @@ class UserProfileInfo extends StatelessWidget {
     final movieCount = (user['movies'] as List?)?.length ?? 0;
     final followers = List<String>.from(user['followers'] ?? []);
     final following = List<String>.from(user['following'] ?? []);
-    final rating = user['rating'] ?? 0;
     final uid = user['uid'];
-
+    final scoreSum = (user['rating'] as List<dynamic>? ?? [])
+        .map((r) => (r['score'] ?? 0) as int)
+        .fold(0, (a, b) => a + b);
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -87,7 +90,26 @@ class UserProfileInfo extends StatelessWidget {
                         value: '${following.length}',
                       ),
                     ),
-                    _StatItem(label: 'Rating', value: rating.toString()),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (_) => ViewRatingsPage(
+                                  ratings:
+                                      (user['rating'] as List<dynamic>)
+                                          .map((r) => Rating.fromMap(r))
+                                          .toList(),
+                                ),
+                          ),
+                        );
+                      },
+                      child: _StatItem(
+                        label: 'Rating',
+                        value: scoreSum.toString(),
+                      ),
+                    ),
                   ],
                 ),
               ),

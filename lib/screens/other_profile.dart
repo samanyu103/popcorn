@@ -56,6 +56,43 @@ class OtherProfilePage extends StatelessWidget {
     await otherRef.update({'followers': otherFollowers});
   }
 
+  Future<void> _toggleRequest(Map<String, dynamic> user) async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    final otherUserUid = user['uid'];
+
+    if (currentUser == null || currentUser.uid == otherUserUid) return;
+
+    final currentRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(currentUser.uid);
+    final otherRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(otherUserUid);
+
+    final currentSnap = await currentRef.get();
+    final otherSnap = await otherRef.get();
+
+    final currentOutgoing = List<String>.from(
+      currentSnap['outgoingRequests'] ?? [],
+    );
+    final otherIncoming = List<String>.from(
+      otherSnap['incomingRequests'] ?? [],
+    );
+
+    final isAlreadyRequested = currentOutgoing.contains(otherUserUid);
+
+    if (isAlreadyRequested) {
+      currentOutgoing.remove(otherUserUid);
+      otherIncoming.remove(currentUser.uid);
+    } else {
+      currentOutgoing.add(otherUserUid);
+      otherIncoming.add(currentUser.uid);
+    }
+
+    await currentRef.update({'outgoingRequests': currentOutgoing});
+    await otherRef.update({'incomingRequests': otherIncoming});
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
@@ -98,6 +135,11 @@ class OtherProfilePage extends StatelessWidget {
             final rawMovies = user['movies'] as List<dynamic>? ?? [];
             final movies = rawMovies.map((m) => Movie.fromMap(m)).toList();
 
+            final incomingRequests = List<String>.from(
+              user['incomingRequests'] ?? [],
+            );
+            final hasRequested = incomingRequests.contains(currentUser!.uid);
+
             return Scaffold(
               appBar: AppBar(title: Text("$username's Profile")),
               body: Center(
@@ -112,12 +154,12 @@ class OtherProfilePage extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               ElevatedButton(
-                                onPressed:
-                                    () => DbService.requestPopcorn(
-                                      fromUid: currentUser.uid,
-                                      toUid: otherUserUid,
-                                    ),
-                                child: const Text('Request a Popcorn'),
+                                onPressed: () => _toggleRequest(user),
+                                child: Text(
+                                  hasRequested
+                                      ? 'Cancel Request'
+                                      : 'Request a Popcorn',
+                                ),
                               ),
                               ElevatedButton(
                                 onPressed: () => _toggleFollow(user),

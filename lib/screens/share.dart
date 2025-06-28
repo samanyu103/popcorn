@@ -102,6 +102,8 @@ class _SeenByANotBState extends State<SeenByANotB> {
               ),
             );
           }
+          // sort descending order of imdb ratings
+          movies.sort((a, b) => (b.imdb_rating).compareTo(a.imdb_rating));
 
           return GridView.builder(
             padding: const EdgeInsets.all(12),

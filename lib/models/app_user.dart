@@ -1,5 +1,6 @@
 import 'movie.dart';
 import 'popcorn.dart';
+import 'rating.dart';
 
 class AppUser {
   final String uid;
@@ -11,7 +12,7 @@ class AppUser {
   final List<Movie> movies;
   final List<String> followers;
   final List<String> following;
-  final int rating;
+  final List<Rating> rating;
 
   final List<Popcorn> incomingPopcorns;
   final List<Popcorn> outgoingPopcorns;
@@ -49,7 +50,10 @@ class AppUser {
               .toList(),
       followers: List<String>.from(map['followers'] ?? []),
       following: List<String>.from(map['following'] ?? []),
-      rating: map['rating'] ?? 0,
+      rating:
+          (map['rating'] as List<dynamic>? ?? [])
+              .map((ratingMap) => Rating.fromMap(ratingMap))
+              .toList(),
       incomingPopcorns:
           (map['incomingPopcorns'] as List<dynamic>? ?? [])
               .map((p) => Popcorn.fromMap(p))
@@ -74,7 +78,7 @@ class AppUser {
       'movies': movies.map((movie) => movie.toMap()).toList(),
       'followers': followers,
       'following': following,
-      'rating': rating,
+      'rating': rating.map((r) => r.toMap()).toList(),
       'incomingPopcorns': incomingPopcorns.map((p) => p.toMap()).toList(),
       'outgoingPopcorns': outgoingPopcorns.map((p) => p.toMap()).toList(),
       'incomingRequests': incomingRequests,

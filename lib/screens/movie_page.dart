@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/db.dart';
 import '../models/movie.dart';
+import '../models/rating.dart';
 
 class MoviePage extends StatefulWidget {
   final String tconst;
@@ -218,7 +219,32 @@ class _MoviePageState extends State<MoviePage> {
                         widget.tconst,
                         widget.currentUid,
                       );
+
                       // ratings
+                      if (foundinotheruserdb) {
+                        final user = await DbService().getUserProfile(
+                          widget.currentUid,
+                        );
+                        final username = user!.username;
+                        final rating = Rating(
+                          tconst: widget.tconst,
+                          name: _movieData!['name'],
+                          poster_url: _movieData!['poster_url'],
+                          liked: _liked,
+                          score:
+                              _liked == true
+                                  ? 1
+                                  : _liked == false
+                                  ? -1
+                                  : 0,
+                          timeAdded: DateTime.now(),
+                          toUserName: username,
+                        );
+                        await DbService.addRatingToUser(
+                          rating,
+                          widget.otherUid!,
+                        );
+                      }
 
                       if (context.mounted) {
                         Navigator.pushReplacementNamed(context, '/home');

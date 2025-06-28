@@ -15,8 +15,9 @@ class MovieGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final sortedMovies = List<Movie>.from(movies)
-    //   ..sort((a, b) => b.timeAdded.compareTo(a.timeAdded));
+    // sort with latest post first
+    movies.sort((a, b) => (b.timeAdded).compareTo(a.timeAdded));
+
     return GridView.builder(
       padding: const EdgeInsets.all(8),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

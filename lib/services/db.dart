@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../models/app_user.dart';
 import '../models/movie.dart';
 import '../models/popcorn.dart';
+import '../models/rating.dart';
 
 class DbService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -50,7 +51,7 @@ class DbService {
       'movies': [],
       'followers': [],
       'following': [],
-      'rating': 0,
+      'rating': [],
       'incomingPopcorns': [],
       'outgoingPopcorns': [],
       'incomingRequests': [],
@@ -99,7 +100,7 @@ class DbService {
       }
 
       await userDocRef.update({'movies': movies});
-      print('Movie saved successfully!');
+      // print('Movie saved successfully!');
     } catch (e) {
       print('Error saving movie: $e');
     }
@@ -157,7 +158,7 @@ class DbService {
         'incomingRequests': FieldValue.arrayUnion([fromUid]),
       });
 
-      print('Popcorn request sent!');
+      // print('Popcorn request sent!');
     } catch (e) {
       print('Error requesting popcorn: $e');
     }
@@ -261,5 +262,34 @@ class DbService {
       ..removeWhere((pop) => pop['tconst'] == tconst);
 
     await userRef.update({'incomingPopcorns': updatedIncoming});
+  }
+
+  static Future<void> addRatingToUser(Rating rating, String uid) async {
+    final userDoc = FirebaseFirestore.instance.collection('users').doc(uid);
+
+    try {
+      await userDoc.update({
+        'rating': FieldValue.arrayUnion([rating.toMap()]),
+      });
+      print('Rating added to user $uid!');
+    } catch (e) {
+      print('Error adding rating to user: $e');
+    }
+  }
+
+  static Future<Map<String, dynamic>?> getUserByUsername(
+    String username,
+  ) async {
+    final query =
+        await FirebaseFirestore.instance
+            .collection('users')
+            .where('username', isEqualTo: username)
+            .limit(1)
+            .get();
+
+    if (query.docs.isNotEmpty) {
+      return query.docs.first.data() as Map<String, dynamic>;
+    }
+    return null;
   }
 }

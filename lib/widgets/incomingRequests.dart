@@ -15,7 +15,7 @@ class IncomingRequestsWidget extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         itemCount: incomingRequests.length,
         itemBuilder: (context, index) {
-          final uid = incomingRequests[index];
+          final uid = incomingRequests[incomingRequests.length - 1 - index];
           return FutureBuilder<DocumentSnapshot>(
             future:
                 FirebaseFirestore.instance.collection('users').doc(uid).get(),

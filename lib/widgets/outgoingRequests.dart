@@ -15,7 +15,8 @@ class OutgoingRequestsWidget extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         itemCount: outgoingRequests.length,
         itemBuilder: (context, index) {
-          final uid = outgoingRequests[index];
+          // newest first
+          final uid = outgoingRequests[outgoingRequests.length - 1 - index];
           return FutureBuilder<DocumentSnapshot>(
             future:
                 FirebaseFirestore.instance.collection('users').doc(uid).get(),
