@@ -46,11 +46,11 @@ class UserProfileInfo extends StatelessWidget {
               CircleAvatar(
                 radius: 40,
                 backgroundImage:
-                    user['profileUrl'] != null
-                        ? NetworkImage(user['profileUrl'])
+                    user['profile_picture'] != null
+                        ? NetworkImage(user['profile_picture'])
                         : null,
                 child:
-                    user['profileUrl'] == null
+                    user['profile_picture'] == null
                         ? const Icon(Icons.person, size: 40)
                         : null,
               ),

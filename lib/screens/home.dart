@@ -113,7 +113,7 @@ class HomeScreen extends StatelessWidget {
           if (user == null) {
             return const Center(child: Text('User data not found.'));
           }
-
+          // print("user $user");
           final rawMovies = user['movies'] as List<dynamic>? ?? [];
           final movies = rawMovies.map((m) => Movie.fromMap(m)).toList();
 

@@ -4,6 +4,8 @@ import '../models/app_user.dart';
 import '../models/movie.dart';
 import '../models/popcorn.dart';
 import '../models/rating.dart';
+import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class DbService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -308,5 +310,25 @@ class DbService {
       return query.docs.first.data() as Map<String, dynamic>;
     }
     return null;
+  }
+
+  Future<String?> uploadProfilePicture(String uid, File imageFile) async {
+    try {
+      final ref = FirebaseStorage.instance.ref().child(
+        'profile_pictures/$uid.jpg',
+      );
+
+      await ref.putFile(imageFile);
+      return await ref.getDownloadURL();
+    } catch (e) {
+      print('Error uploading profile picture: $e');
+      return null;
+    }
+  }
+
+  Future<void> setProfilePictureToNull(String uid) async {
+    await FirebaseFirestore.instance.collection('users').doc(uid).update({
+      'profile_picture': null,
+    });
   }
 }
