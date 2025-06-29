@@ -6,6 +6,7 @@ import 'models/app_user.dart';
 import 'screens/authenticate/login.dart';
 import 'screens/authenticate/signup.dart';
 import 'screens/authenticate/verify_email.dart';
+import 'screens/authenticate/forgot_password.dart';
 import 'screens/authenticate/phone.dart';
 import 'screens/details.dart';
 import 'screens/home.dart';
@@ -37,6 +38,7 @@ class MyApp extends StatelessWidget {
         '/popcorn': (_) => const PopcornPage(),
         '/verify-email': (_) => const VerifyEmailScreen(),
         '/phone-login': (_) => const PhoneLoginScreen(),
+        '/forgot-password': (_) => const ForgotPasswordScreen(),
       },
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
