@@ -59,7 +59,7 @@ class _SearchPageState extends State<SearchPage> {
               final data = filteredDocs[i].data() as Map<String, dynamic>;
               return ListTile(
                 title: Text(data['username']),
-                subtitle: Text(data['email']),
+                // subtitle: Text(data['email']),
                 onTap: () {
                   Navigator.push(
                     context,

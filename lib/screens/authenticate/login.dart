@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import '../services/auth.dart';
+import '../../services/auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../main.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,20 +14,27 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   String _email = '', _password = '';
   final _authService = AuthService();
+  bool _obscurePassword = true;
 
   void _submit() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      try {
-        await _authService.signIn(_email, _password);
+
+      final errorMessage = await _authService.signIn(_email, _password);
+
+      if (errorMessage == null) {
         if (mounted) {
-          Navigator.pushReplacementNamed(context, '/home');
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => const MyApp()),
+            (route) => false,
+          );
         }
-      } catch (e) {
+      } else {
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text(e.toString())));
+          ).showSnackBar(SnackBar(content: Text(errorMessage)));
         }
       }
     }
@@ -45,17 +54,31 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: const InputDecoration(labelText: 'Email'),
                 keyboardType: TextInputType.emailAddress,
                 onSaved: (value) => _email = value!.trim(),
-                // validator:
-                //     (value) =>
-                //         value!.contains('@') ? null : 'Enter a valid email',
+                validator:
+                    (value) =>
+                        value!.contains('@') ? null : 'Enter a valid email',
               ),
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Password'),
-                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
+                  ),
+                ),
+                obscureText: _obscurePassword,
                 onSaved: (value) => _password = value!.trim(),
-                // validator:
-                //     (value) =>
-                //         value!.length >= 6 ? null : 'Minimum 6 characters',
+                validator:
+                    (value) =>
+                        value!.length >= 6 ? null : 'Minimum 6 characters',
               ),
               const SizedBox(height: 20),
               ElevatedButton(onPressed: _submit, child: const Text('Login')),
@@ -64,6 +87,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   Navigator.pushNamed(context, '/signup');
                 },
                 child: const Text("Don't have an account? Sign Up"),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/phone-login');
+                },
+                child: const Text("Login with Phone Number"),
               ),
             ],
           ),

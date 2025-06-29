@@ -6,7 +6,9 @@ import '../services/db.dart';
 import '../widgets/profilePicturePicker.dart';
 
 class DetailsScreen extends StatefulWidget {
-  const DetailsScreen({super.key});
+  final bool logout;
+
+  const DetailsScreen({super.key, this.logout = false});
 
   @override
   State<DetailsScreen> createState() => _DetailsScreenState();
@@ -31,7 +33,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
       final uid = _authService.getCurrentUserId();
       final email = _authService.getCurrentUserEmail();
-      if (uid == null || email == null) return;
+      if (uid == null) return;
 
       // Check username only on creation
       if (!_profileExists) {
@@ -92,10 +94,30 @@ class _DetailsScreenState extends State<DetailsScreen> {
     return userData;
   }
 
+  // Logout handler
+  Future<void> _logout() async {
+    await _authService.signOut();
+    if (mounted) {
+      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Your Profile')),
+      appBar: AppBar(
+        title: const Text('Your Profile'),
+        actions:
+            widget.logout
+                ? [
+                  IconButton(
+                    icon: const Icon(Icons.logout),
+                    onPressed: _logout,
+                    tooltip: 'Logout',
+                  ),
+                ]
+                : null,
+      ),
       body: FutureBuilder<AppUser?>(
         future: _loadProfile(),
         builder: (context, snapshot) {
@@ -120,7 +142,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
                         _profilePicture = null;
                       },
                     ),
-
                     const SizedBox(height: 20),
                     TextFormField(
                       initialValue: _username,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/auth.dart';
+import '../../services/auth.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -11,22 +11,24 @@ class SignupScreen extends StatefulWidget {
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
   String _email = '', _password = '';
+  bool _obscurePassword = true;
 
   final _authService = AuthService();
 
   void _submit() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      try {
-        await _authService.signUp(_email, _password);
+      // print("$_email, $_password");
+      final errorMessage = await _authService.signUp(_email, _password);
+      if (errorMessage == null) {
         if (mounted) {
-          Navigator.pushReplacementNamed(context, '/details');
+          Navigator.pushReplacementNamed(context, '/verify-email');
         }
-      } catch (e) {
+      } else {
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text(e.toString())));
+          ).showSnackBar(SnackBar(content: Text(errorMessage)));
         }
       }
     }
@@ -46,15 +48,30 @@ class _SignupScreenState extends State<SignupScreen> {
                 decoration: const InputDecoration(labelText: 'Email'),
                 // keyboardType: TextInputType.emailAddress,
                 onSaved: (val) => _email = val!.trim(),
-                // validator:
-                //     (val) => val!.contains('@') ? null : 'Enter a valid email',
+                validator:
+                    (val) => val!.contains('@') ? null : 'Enter a valid email',
               ),
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Password'),
-                obscureText: true,
-                onSaved: (val) => _password = val!.trim(),
-                // validator:
-                //     (val) => val!.length >= 6 ? null : 'Min 6 characters',
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
+                  ),
+                ),
+                obscureText: _obscurePassword,
+                onSaved: (value) => _password = value!.trim(),
+                validator:
+                    (value) =>
+                        value!.length >= 6 ? null : 'Minimum 6 characters',
               ),
               const SizedBox(height: 20),
               ElevatedButton(onPressed: _submit, child: const Text('Sign Up')),

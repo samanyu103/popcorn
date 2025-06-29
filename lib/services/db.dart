@@ -39,7 +39,7 @@ class DbService {
 
   Future<void> createUserProfile({
     required String uid,
-    required String email,
+    required String? email,
     required String username,
     required String name,
     required String about,

@@ -4,7 +4,7 @@ import 'rating.dart';
 
 class AppUser {
   final String uid;
-  final String email;
+  final String? email;
   final String username;
   final String? profilePicture;
   final String name;

@@ -3,8 +3,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'services/db.dart';
 import 'models/app_user.dart';
-import 'screens/login.dart';
-import 'screens/signup.dart';
+import 'screens/authenticate/login.dart';
+import 'screens/authenticate/signup.dart';
+import 'screens/authenticate/verify_email.dart';
+import 'screens/authenticate/phone.dart';
 import 'screens/details.dart';
 import 'screens/home.dart';
 import 'screens/search.dart';
@@ -33,6 +35,8 @@ class MyApp extends StatelessWidget {
         '/search': (_) => const SearchPage(),
         '/movies_search': (_) => const MoviesSearchPage(),
         '/popcorn': (_) => const PopcornPage(),
+        '/verify-email': (_) => const VerifyEmailScreen(),
+        '/phone-login': (_) => const PhoneLoginScreen(),
       },
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
@@ -47,6 +51,14 @@ class MyApp extends StatelessWidget {
           // debugPrint('User: $user');
           if (user == null) {
             return const LoginScreen();
+          }
+
+          final isEmailPassword = user.providerData.any(
+            (info) => info.providerId == 'password',
+          );
+          // print("$isEmailPassword, ${user.emailVerified}");
+          if (isEmailPassword && !user.emailVerified) {
+            return const VerifyEmailScreen();
           }
 
           // Authenticated — now check Firestore for user profile
@@ -68,7 +80,7 @@ class MyApp extends StatelessWidget {
               // print("user data: $userData");
 
               if (userData == null) {
-                return const DetailsScreen();
+                return const DetailsScreen(logout: true);
               }
 
               return const HomeScreen();
