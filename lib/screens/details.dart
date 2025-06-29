@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:popcorn/models/app_user.dart';
 import '../services/auth.dart';
 import '../services/db.dart';
+import '../widgets/profilePicturePicker.dart';
 
 class DetailsScreen extends StatefulWidget {
   const DetailsScreen({super.key});
@@ -23,17 +23,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
   String? _profilePicture;
   File? _pickedImage;
   bool _profileExists = false;
-
-  // Pick an image from the gallery
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.gallery);
-    if (picked != null) {
-      setState(() {
-        _pickedImage = File(picked.path);
-      });
-    }
-  }
 
   // Submit the form
   Future<void> _submit() async {
@@ -121,55 +110,17 @@ class _DetailsScreenState extends State<DetailsScreen> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    Stack(
-                      alignment: Alignment.topRight,
-                      children: [
-                        GestureDetector(
-                          onTap: _pickImage,
-                          child: CircleAvatar(
-                            radius: 50,
-                            backgroundImage:
-                                _pickedImage != null
-                                    ? FileImage(_pickedImage!)
-                                    : (_profilePicture != null
-                                            ? NetworkImage(_profilePicture!)
-                                            : null)
-                                        as ImageProvider?,
-                            child:
-                                (_pickedImage == null &&
-                                        _profilePicture == null)
-                                    ? const Icon(Icons.add_a_photo, size: 40)
-                                    : null,
-                          ),
-                        ),
-                        if (_profilePicture != null || _pickedImage != null)
-                          Positioned(
-                            top: 0,
-                            right: 0,
-                            child: GestureDetector(
-                              onTap: () async {
-                                final uid = _authService.getCurrentUserId();
-                                if (uid != null) {
-                                  await _dbService.setProfilePictureToNull(uid);
-                                  setState(() {
-                                    _pickedImage = null;
-                                    _profilePicture = null;
-                                  });
-                                }
-                              },
-                              child: const CircleAvatar(
-                                radius: 14,
-                                backgroundColor: Colors.red,
-                                child: Icon(
-                                  Icons.close,
-                                  color: Colors.white,
-                                  size: 16,
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
+                    ProfilePicturePicker(
+                      initialPicture: _profilePicture,
+                      onImagePicked: (file) {
+                        _pickedImage = file;
+                      },
+                      onImageRemoved: () {
+                        _pickedImage = null;
+                        _profilePicture = null;
+                      },
                     ),
+
                     const SizedBox(height: 20),
                     TextFormField(
                       initialValue: _username,
