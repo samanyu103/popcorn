@@ -54,5 +54,7 @@ app.*.map.json
 
 
 # keys
-android/app/google-services.json
-ios/Runner/GoogleService-Info.plist
+# android/app/google-services.json
+# ios/Runner/GoogleService-Info.plist
+android/app/popcorn-release-key.jks
+android/key.properties

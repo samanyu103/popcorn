@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "1091619210781",
+    "project_id": "popcorn-a42fa",
+    "storage_bucket": "popcorn-a42fa.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1091619210781:android:1991bef5f59ad479d4a8f4",
+        "android_client_info": {
+          "package_name": "com.example.popcorn"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1091619210781-q2fbsdbuv6v0sv6rte7sfv93pio7moog.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD1PE-zaHEJQMZ16lxbaxTvAcjtS_unp6o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1091619210781-q2fbsdbuv6v0sv6rte7sfv93pio7moog.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1091619210781-e4m2qeb4qlfkv0n35lnns8u8co13brdt.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.popcorn"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

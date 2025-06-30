@@ -14,11 +14,33 @@ import 'screens/search.dart';
 import 'screens/search_movies.dart';
 import 'screens/popcorn.dart';
 import 'screens/matching.dart';
+import 'screens/logo.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(const MyApp());
+  runApp(const AppBootstrapper());
+}
+
+class AppBootstrapper extends StatelessWidget {
+  const AppBootstrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: Future.delayed(const Duration(seconds: 2)),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const MaterialApp(
+            debugShowCheckedModeBanner: false,
+            home: InitialScreen(),
+          );
+        }
+
+        return const MyApp();
+      },
+    );
+  }
 }
 
 class MyApp extends StatelessWidget {
