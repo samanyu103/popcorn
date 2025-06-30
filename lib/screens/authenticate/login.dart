@@ -3,7 +3,7 @@ import '../../services/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../main.dart';
 import 'dart:io' show Platform;
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+// import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -129,13 +129,29 @@ class _LoginScreenState extends State<LoginScreen> {
               //   },
               // ),
               // if (Platform.isIOS)
-              //   SignInWithAppleButton(
+              //   ElevatedButton.icon(
+              //     icon: const Icon(Icons.apple, size: 20),
+              //     label: const Text('Sign in with Apple'),
+              //     style: ElevatedButton.styleFrom(
+              //       backgroundColor: Colors.black,
+              //       foregroundColor: Colors.white,
+              //     ),
               //     onPressed: () async {
-              //       final error = await _authService.signInWithApple();
-              //       if (error != null) {
-              //         ScaffoldMessenger.of(
-              //           context,
-              //         ).showSnackBar(SnackBar(content: Text(error)));
+              //       final errorMessage = await _authService.signInWithApple();
+              //       if (errorMessage == null) {
+              //         if (mounted) {
+              //           Navigator.pushAndRemoveUntil(
+              //             context,
+              //             MaterialPageRoute(builder: (_) => const MyApp()),
+              //             (route) => false,
+              //           );
+              //         }
+              //       } else {
+              //         if (mounted) {
+              //           ScaffoldMessenger.of(
+              //             context,
+              //           ).showSnackBar(SnackBar(content: Text(errorMessage)));
+              //         }
               //       }
               //     },
               //   ),

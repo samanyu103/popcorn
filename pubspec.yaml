@@ -62,7 +62,7 @@ dependencies:
   cloud_firestore: ^4.17.5     # expects Firestore 10.25.0
   firebase_storage: ^11.6.0    # compatible
   # google_sign_in: ^6.2.2        # fine
-  sign_in_with_apple: ^5.0.0
+  # sign_in_with_apple: ^5.0.0
   image_picker: ^1.1.0
   cupertino_icons: ^1.0.8
 
