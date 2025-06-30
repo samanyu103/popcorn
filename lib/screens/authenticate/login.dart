@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../services/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../main.dart';
+import 'dart:io' show Platform;
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -104,6 +106,39 @@ class _LoginScreenState extends State<LoginScreen> {
                 },
                 child: const Text("Login with Phone Number"),
               ),
+              // ElevatedButton.icon(
+              //   icon: const Icon(Icons.login),
+              //   label: const Text('Sign in with Google'),
+              //   onPressed: () async {
+              //     final errorMessage = await _authService.signInWithGoogle();
+              //     if (errorMessage == null) {
+              //       if (mounted) {
+              //         Navigator.pushAndRemoveUntil(
+              //           context,
+              //           MaterialPageRoute(builder: (_) => const MyApp()),
+              //           (route) => false,
+              //         );
+              //       }
+              //     } else {
+              //       if (mounted) {
+              //         ScaffoldMessenger.of(
+              //           context,
+              //         ).showSnackBar(SnackBar(content: Text(errorMessage)));
+              //       }
+              //     }
+              //   },
+              // ),
+              // if (Platform.isIOS)
+              //   SignInWithAppleButton(
+              //     onPressed: () async {
+              //       final error = await _authService.signInWithApple();
+              //       if (error != null) {
+              //         ScaffoldMessenger.of(
+              //           context,
+              //         ).showSnackBar(SnackBar(content: Text(error)));
+              //       }
+              //     },
+              //   ),
             ],
           ),
         ),

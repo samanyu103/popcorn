@@ -13,6 +13,7 @@ import 'screens/home.dart';
 import 'screens/search.dart';
 import 'screens/search_movies.dart';
 import 'screens/popcorn.dart';
+import 'screens/matching.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,6 +40,7 @@ class MyApp extends StatelessWidget {
         '/verify-email': (_) => const VerifyEmailScreen(),
         '/phone-login': (_) => const PhoneLoginScreen(),
         '/forgot-password': (_) => const ForgotPasswordScreen(),
+        '/matches': (_) => const FindMatchesPage(),
       },
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),

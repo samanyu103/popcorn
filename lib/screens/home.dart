@@ -9,14 +9,23 @@ import '../widgets/posts.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
+  // 0--home
+  // 1 -- search
+  // 2 -- movies search
+  // 3 -- matches
+  // 4 --
   void _onNavTapped(BuildContext context, int index) {
     if (index == 1) {
-      Navigator.pushNamed(context, '/movies_search');
-    }
-    if (index == 2) {
       Navigator.pushNamed(context, '/search');
     }
+    if (index == 2) {
+      Navigator.pushNamed(context, '/movies_search');
+    }
     if (index == 3) {
+      Navigator.pushNamed(context, '/matches');
+    }
+
+    if (index == 4) {
       Navigator.pushNamed(context, '/popcorn');
     }
   }
@@ -132,11 +141,15 @@ class HomeScreen extends StatelessWidget {
         onTap: (index) => _onNavTapped(context, index),
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
           BottomNavigationBarItem(
             icon: Icon(Icons.add_box_outlined),
             label: 'Post',
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.people_alt),
+            label: 'Matches',
+          ),
           BottomNavigationBarItem(
             icon: Text('🍿', style: TextStyle(fontSize: 24)),
             label: 'Popcorn',

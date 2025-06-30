@@ -27,18 +27,48 @@ environment:
 # dependencies can be manually updated by changing the version numbers below to
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
+# dependencies:
+#   flutter:
+#     sdk: flutter
+#   firebase_core: ^2.32.0 
+#   firebase_auth: ^4.16.0 
+#   cloud_firestore: ^4.17.5
+#   image_picker: ^1.1.0
+#   firebase_storage: ^11.6.0
+#   google_sign_in: 6.1.5
+#   cupertino_icons: ^1.0.8
+
+
+
+# dependencies:
+#   flutter:
+#     sdk: flutter
+#   firebase_core: 2.24.2       # ✅ compatible with Firebase iOS SDK 10.16.0
+#   firebase_auth: 4.16.0
+#   cloud_firestore: 4.13.2
+#   firebase_storage: ^11.6.0    # ✅ exists and compatible
+#   image_picker: 1.1.0
+#   google_sign_in: 5.4.4
+#   # The following adds the Cupertino Icons font to your application.
+#   # Use with the CupertinoIcons class for iOS style icons.
+#     cupertino_icons: ^1.0.8
+
+
 dependencies:
   flutter:
     sdk: flutter
-  firebase_core: ^2.32.0 
-  firebase_auth: ^4.16.0 
-  cloud_firestore: ^4.17.5
+  firebase_core: ^2.32.0       # pulls Firebase SDK 10.25.0
+  firebase_auth: ^4.20.0       # compatible
+  cloud_firestore: ^4.17.5     # expects Firestore 10.25.0
+  firebase_storage: ^11.6.0    # compatible
+  # google_sign_in: ^6.2.2        # fine
+  sign_in_with_apple: ^5.0.0
   image_picker: ^1.1.0
-  firebase_storage: ^11.5.0
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+
+# dependency_overrides:
+#   google_sign_in_ios:
+#     path: empty_package/google_sign_in_ios
 
 dev_dependencies:
   flutter_test:

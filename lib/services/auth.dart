@@ -1,4 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -60,4 +62,53 @@ class AuthService {
 
   String? getCurrentUserId() => _auth.currentUser?.uid;
   String? getCurrentUserEmail() => _auth.currentUser?.email;
+
+  // Future<String?> signInWithGoogle() async {
+  //   try {
+  //     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+  //     if (googleUser == null) return 'Google sign-in aborted';
+
+  //     final GoogleSignInAuthentication googleAuth =
+  //         await googleUser.authentication;
+
+  //     final credential = GoogleAuthProvider.credential(
+  //       accessToken: googleAuth.accessToken,
+  //       idToken: googleAuth.idToken,
+  //     );
+
+  //     await _auth.signInWithCredential(credential);
+  //     return null; // success
+  //   } on FirebaseAuthException catch (e) {
+  //     return e.message ?? 'Google sign-in failed';
+  //   } catch (e, stack) {
+  //     print('Unexpected error: $e');
+  //     print('Stack trace: $stack');
+  //     return e.toString(); // this will help you see the actual error message
+  //   }
+  // }
+
+  Future<String?> signInWithApple() async {
+    try {
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      final oauthCredential = OAuthProvider("apple.com").credential(
+        idToken: appleCredential.identityToken,
+        accessToken: appleCredential.authorizationCode,
+      );
+
+      await FirebaseAuth.instance.signInWithCredential(oauthCredential);
+      return null;
+    } on FirebaseAuthException catch (e) {
+      return e.message ?? 'Firebase Apple sign-in failed';
+    } catch (e) {
+      print(e.toString());
+      return e.toString();
+    }
+  }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:popcorn/services/db.dart';
 import 'other_profile.dart';
 
@@ -12,11 +13,11 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   String _searchText = '';
   late final Stream<QuerySnapshot> _usersStream;
+  final String currentUid = FirebaseAuth.instance.currentUser!.uid;
 
   @override
   void initState() {
     super.initState();
-    // Initialize once to avoid repeated reads :contentReference[oaicite:2]{index=2}
     _usersStream = DbService.getUsersStream();
   }
 
@@ -41,12 +42,15 @@ class _SearchPageState extends State<SearchPage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
+
           final allDocs = snapshot.data!.docs;
+
           final filteredDocs =
               allDocs.where((doc) {
                 final data = doc.data() as Map<String, dynamic>;
                 final username = (data['username'] as String).toLowerCase();
-                return username.contains(_searchText);
+                final uid = data['uid'] as String;
+                return uid != currentUid && username.contains(_searchText);
               }).toList();
 
           if (filteredDocs.isEmpty) {
@@ -57,15 +61,24 @@ class _SearchPageState extends State<SearchPage> {
             itemCount: filteredDocs.length,
             itemBuilder: (context, i) {
               final data = filteredDocs[i].data() as Map<String, dynamic>;
+              final profilePicture = data['profile_picture'] as String?;
+              final username = data['username'] as String;
+
               return ListTile(
-                title: Text(data['username']),
-                // subtitle: Text(data['email']),
+                leading: CircleAvatar(
+                  backgroundImage:
+                      profilePicture != null
+                          ? NetworkImage(profilePicture)
+                          : null,
+                  child:
+                      profilePicture == null ? const Icon(Icons.person) : null,
+                ),
+                title: Text(username),
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder:
-                          (_) => OtherProfilePage(username: data['username']),
+                      builder: (_) => OtherProfilePage(username: username),
                     ),
                   );
                 },
