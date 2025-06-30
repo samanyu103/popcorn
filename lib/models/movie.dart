@@ -10,6 +10,7 @@ class Movie {
   final bool? liked;
   final String? review;
   final DateTime timeAdded;
+  final int? numVotes; // New nullable field
 
   Movie({
     required this.tconst,
@@ -21,6 +22,7 @@ class Movie {
     required this.liked,
     this.review,
     required this.timeAdded,
+    this.numVotes,
   });
 
   factory Movie.fromMap(Map<String, dynamic> map) {
@@ -34,6 +36,7 @@ class Movie {
       liked: map['liked'],
       review: map['review'],
       timeAdded: (map['time_added'] as Timestamp).toDate(),
+      numVotes: map['numVotes'], // Safe: Firestore stores nulls too
     );
   }
 
@@ -48,6 +51,7 @@ class Movie {
       'liked': liked,
       'review': review,
       'time_added': Timestamp.fromDate(timeAdded),
+      'numVotes': numVotes,
     };
   }
 }

@@ -25,7 +25,8 @@ for movie in movies:
         'name': movie['name'],
         'year': movie['year'],
         'imdb_rating': movie['imdb_rating'],
-        'poster_url': movie['poster_url']
+        'poster_url': movie['poster_url'],
+        'numVotes': movie['numVotes'],
     })
 
 end_time = time.time()  # ⏱️ End timing

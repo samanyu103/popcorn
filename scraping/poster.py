@@ -34,6 +34,7 @@ for _, row in topN.iterrows():
     name = row['primaryTitle']
     rating = row['averageRating']
     start_year = row['startYear']
+    numVotes = row['numVotes']
     poster_url = get_poster_url(tconst, API_KEY)
 
     results.append({
@@ -41,7 +42,8 @@ for _, row in topN.iterrows():
         'name': name,
         'year': int(start_year),
         'imdb_rating': float(rating),
-        'poster_url': poster_url
+        'poster_url': poster_url,
+        'numVotes': numVotes,
     })
     # Optional: sleep to avoid rate limits
     # time.sleep(0.25)

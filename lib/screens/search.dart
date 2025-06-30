@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:popcorn/services/db.dart';
 import 'other_profile.dart';
+import '../widgets/tile.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -64,24 +65,9 @@ class _SearchPageState extends State<SearchPage> {
               final profilePicture = data['profile_picture'] as String?;
               final username = data['username'] as String;
 
-              return ListTile(
-                leading: CircleAvatar(
-                  backgroundImage:
-                      profilePicture != null
-                          ? NetworkImage(profilePicture)
-                          : null,
-                  child:
-                      profilePicture == null ? const Icon(Icons.person) : null,
-                ),
-                title: Text(username),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => OtherProfilePage(username: username),
-                    ),
-                  );
-                },
+              return UserListTile(
+                username: username,
+                profilePicture: profilePicture,
               );
             },
           );

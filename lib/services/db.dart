@@ -290,7 +290,7 @@ class DbService {
       await userDoc.update({
         'rating': FieldValue.arrayUnion([rating.toMap()]),
       });
-      print('Rating added to user $uid!');
+      // print('Rating added to user $uid!');
     } catch (e) {
       print('Error adding rating to user: $e');
     }

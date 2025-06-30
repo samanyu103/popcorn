@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/app_user.dart';
 import '../services/db.dart'; // getCurrentUserProfile()
 import '../services/matching.dart'; // findTopMatches(AppUser currentUser)
-import 'other_profile.dart'; // OtherProfilePage
+import '../widgets/tile.dart'; // OtherProfilePage
 
 class FindMatchesPage extends StatefulWidget {
   const FindMatchesPage({super.key});
@@ -29,7 +29,7 @@ class _FindMatchesPageState extends State<FindMatchesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Find Matches')),
+      appBar: AppBar(title: const Text('Your Top Matches')),
       body: FutureBuilder<List<AppUser>>(
         future: _matchesFuture,
         builder: (context, snapshot) {
@@ -49,26 +49,11 @@ class _FindMatchesPageState extends State<FindMatchesPage> {
             itemCount: matches.length,
             itemBuilder: (context, index) {
               final user = matches[index];
-              return ListTile(
-                leading: CircleAvatar(
-                  backgroundImage:
-                      user.profilePicture != null
-                          ? NetworkImage(user.profilePicture!)
-                          : null,
-                  child:
-                      user.profilePicture == null
-                          ? const Icon(Icons.person)
-                          : null,
-                ),
-                title: Text(user.username),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => OtherProfilePage(username: user.username),
-                    ),
-                  );
-                },
+              final profilePicture = user.profilePicture;
+              final username = user.username;
+              return UserListTile(
+                username: username,
+                profilePicture: profilePicture,
               );
             },
           );

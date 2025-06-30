@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'other_profile.dart';
+import '../widgets/tile.dart';
 
 class FollowersListPage extends StatelessWidget {
   final String userUid; // UID of the user whose followers we want
@@ -37,18 +37,11 @@ class FollowersListPage extends StatelessWidget {
             itemCount: users.length,
             itemBuilder: (context, index) {
               final user = users[index];
-              return ListTile(
-                title: Text(user['username']),
-                subtitle: Text(user['email']),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (_) => OtherProfilePage(username: user['username']),
-                    ),
-                  );
-                },
+              final profilePicture = user['profile_picture'] as String?;
+              final username = user['username'] as String;
+              return UserListTile(
+                username: username,
+                profilePicture: profilePicture,
               );
             },
           );
