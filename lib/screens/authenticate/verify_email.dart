@@ -83,7 +83,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
-              'A verification link has been sent to your email.\nPlease verify to continue.',
+              'A verification link has been sent to your email.(Ckeck your Spam folder)\nPlease verify to continue.',
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),

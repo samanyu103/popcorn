@@ -2,13 +2,14 @@ import pandas as pd
 import requests
 import time
 import json
+from tqdm import tqdm
 
-N = 100
+# N = 100
 API_KEY = '9e0dfc62'  # Replace with your OMDb API key
 
 # Load and sort the TSV file
 df = pd.read_csv('numVotes.tsv', sep='\t')
-topN = df.sort_values(by='numVotes', ascending=False).head(N)
+topN = df.sort_values(by='numVotes', ascending=False)
 
 # Function to fetch poster URL using OMDb
 def get_poster_url(tconst: str, api_key: str) -> str | None:
@@ -25,11 +26,12 @@ def get_poster_url(tconst: str, api_key: str) -> str | None:
         return None
 
 results = []
+output_file = 'posters.jsonl'
 
 start_time = time.time()
 
-# Iterate over top movies and collect data
-for _, row in topN.iterrows():
+# Iterate with tqdm
+for _, row in tqdm(topN.iterrows(), total=len(topN), desc="Fetching posters"):
     tconst = row['tconst']
     name = row['primaryTitle']
     rating = row['averageRating']
@@ -37,22 +39,24 @@ for _, row in topN.iterrows():
     numVotes = row['numVotes']
     poster_url = get_poster_url(tconst, API_KEY)
 
-    results.append({
+    result = {
         'tconst': tconst,
         'name': name,
         'year': int(start_year),
         'imdb_rating': float(rating),
         'poster_url': poster_url,
         'numVotes': numVotes,
-    })
-    # Optional: sleep to avoid rate limits
-    # time.sleep(0.25)
+    }
+
+    results.append(result)
+
+    # Write partial results to file as you go
+    # with open(output_file, 'w', encoding='utf-8') as f:
+    #     json.dump(results, f, ensure_ascii=False, indent=2)
+    with open(output_file, 'a', encoding='utf-8') as f:
+        f.write(json.dumps(result, ensure_ascii=False) + '\n')
 
 end_time = time.time()
 
-# Save to JSON
-with open('top100_posters.json', 'w', encoding='utf-8') as f:
-    json.dump(results, f, ensure_ascii=False, indent=2)
-
-print(f"✅ Saved top {N} movies with posters to top100_posters.json")
+# print(f"✅ Incrementally saved top {N} movies with posters to {output_file}")
 print(f"⏱️ Time taken: {end_time - start_time:.2f} seconds")

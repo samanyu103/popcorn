@@ -15,6 +15,7 @@ import 'screens/search_movies.dart';
 import 'screens/popcorn.dart';
 import 'screens/matching.dart';
 import 'screens/logo.dart';
+import 'screens/contact.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -63,6 +64,7 @@ class MyApp extends StatelessWidget {
         '/phone-login': (_) => const PhoneLoginScreen(),
         '/forgot-password': (_) => const ForgotPasswordScreen(),
         '/matches': (_) => const FindMatchesPage(),
+        '/contact': (context) => const ContactPage(),
       },
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),

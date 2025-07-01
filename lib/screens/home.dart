@@ -103,6 +103,14 @@ class HomeScreen extends StatelessWidget {
                 }
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.contact_mail),
+              title: const Text('Contact Us'),
+              onTap: () {
+                Navigator.pop(context); // Close the drawer
+                Navigator.pushNamed(context, '/contact');
+              },
+            ),
           ],
         ),
       ),
