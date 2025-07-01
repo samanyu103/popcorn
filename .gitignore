@@ -50,7 +50,8 @@ app.*.map.json
 /scraping/title.ratings.tsv
 
 # keys
-/scraping/popcorn-a42fa-firebase-adminsdk-fbsvc-6df305ad4b.json
+# /scraping/popcorn-a42fa-firebase-adminsdk-fbsvc-6df305ad4b.json
+/scraping/popcorn-5e82a-firebase-adminsdk-fbsvc-662d2c290e.json
 
 
 # keys

@@ -27,30 +27,44 @@ class _OtpScreenState extends State<OtpScreen> {
 
   void _sendOtp() async {
     setState(() => _isLoading = true);
-    await _auth.verifyPhoneNumber(
-      phoneNumber: widget.phoneNumber,
-      timeout: const Duration(seconds: 60),
-      forceResendingToken: _resendToken,
-      verificationCompleted: (PhoneAuthCredential credential) async {
-        await _auth.signInWithCredential(credential);
-        _onSuccess();
-      },
-      verificationFailed: (FirebaseAuthException e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Verification failed: ${e.message}')),
-        );
-      },
-      codeSent: (String verificationId, int? resendToken) {
-        setState(() {
-          _verificationId = verificationId;
-          _resendToken = resendToken;
-          _isLoading = false;
-        });
-      },
-      codeAutoRetrievalTimeout: (String verificationId) {
-        setState(() => _verificationId = verificationId);
-      },
-    );
+    try {
+      await _auth.verifyPhoneNumber(
+        phoneNumber: widget.phoneNumber,
+        timeout: const Duration(seconds: 60),
+        forceResendingToken: _resendToken,
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          try {
+            await _auth.signInWithCredential(credential);
+            _onSuccess();
+          } catch (e) {
+            print('Error during automatic sign-in: $e');
+          }
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          print('Verification failed: ${e.code} - ${e.message}');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Verification failed: ${e.message}')),
+          );
+          setState(() => _isLoading = false);
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          setState(() {
+            _verificationId = verificationId;
+            _resendToken = resendToken;
+            _isLoading = false;
+          });
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {
+          setState(() => _verificationId = verificationId);
+        },
+      );
+    } catch (e) {
+      print('Error in verifyPhoneNumber: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Something went wrong. Please try again.')),
+      );
+      setState(() => _isLoading = false);
+    }
   }
 
   void _verifyOtp() async {
@@ -63,6 +77,7 @@ class _OtpScreenState extends State<OtpScreen> {
       await _auth.signInWithCredential(credential);
       _onSuccess();
     } catch (e) {
+      print(e);
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Invalid OTP')));

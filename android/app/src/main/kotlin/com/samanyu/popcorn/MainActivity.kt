@@ -1,4 +1,4 @@
-package com.example.popcorn
+package com.samanyu.popcorn
 
 import io.flutter.embedding.android.FlutterActivity
 

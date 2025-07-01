@@ -59,8 +59,8 @@ class _MoviesSearchPageState extends State<MoviesSearchPage> {
             final dataA = a.data() as Map<String, dynamic>?;
             final dataB = b.data() as Map<String, dynamic>?;
 
-            final ratingA = (dataA?['imdb_rating'] ?? 0).toDouble();
-            final ratingB = (dataB?['imdb_rating'] ?? 0).toDouble();
+            final ratingA = (dataA?['numVotes'] ?? 0).toDouble();
+            final ratingB = (dataB?['numVotes'] ?? 0).toDouble();
 
             return ratingB.compareTo(ratingA); // descending order
           });
