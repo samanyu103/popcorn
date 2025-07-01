@@ -31,7 +31,7 @@ dependencies {
 }
 
 android {
-    namespace = "com.example.popcorn"
+    namespace = "com.samanyu.popcorn"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
 
