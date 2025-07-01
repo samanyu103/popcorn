@@ -49,7 +49,8 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 
 # Initialize Firebase
-cred = credentials.Certificate("popcorn-a42fa-firebase-adminsdk-fbsvc-6df305ad4b.json")
+cred = credentials.Certificate("popcorn-5e82a-firebase-adminsdk-fbsvc-662d2c290e.json")
+
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
