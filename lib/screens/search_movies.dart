@@ -12,16 +12,60 @@ class MoviesSearchPage extends StatefulWidget {
 
 class _MoviesSearchPageState extends State<MoviesSearchPage> {
   String _searchText = '';
-  late final Stream<QuerySnapshot> _moviesStream;
+  List<QueryDocumentSnapshot> _allMovies = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _moviesStream = FirebaseFirestore.instance.collection('movies').snapshots();
+    _loadMovies();
+  }
+
+  Future<void> _loadMovies() async {
+    try {
+      // Try cache first
+      final cacheSnapshot = await FirebaseFirestore.instance
+          .collection('movies')
+          .get(const GetOptions(source: Source.cache));
+
+      if (cacheSnapshot.docs.isNotEmpty) {
+        setState(() {
+          _allMovies = cacheSnapshot.docs;
+          _isLoading = false;
+        });
+      } else {
+        // Fall back to server if cache is empty
+        final serverSnapshot = await FirebaseFirestore.instance
+            .collection('movies')
+            .get(const GetOptions(source: Source.server));
+
+        setState(() {
+          _allMovies = serverSnapshot.docs;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print("Error loading movies: $e");
+      setState(() => _isLoading = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final filteredMovies =
+        _allMovies.where((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            final name = (data['name'] as String?)?.toLowerCase() ?? '';
+            return name.contains(_searchText.toLowerCase());
+          }).toList()
+          ..sort((a, b) {
+            final dataA = a.data() as Map<String, dynamic>?;
+            final dataB = b.data() as Map<String, dynamic>?;
+            final votesA = (dataA?['numVotes'] ?? 0).toDouble();
+            final votesB = (dataB?['numVotes'] ?? 0).toDouble();
+            return votesB.compareTo(votesA);
+          });
+
     return Scaffold(
       appBar: AppBar(
         title: TextField(
@@ -30,93 +74,60 @@ class _MoviesSearchPageState extends State<MoviesSearchPage> {
             prefixIcon: Icon(Icons.search),
             border: InputBorder.none,
           ),
-          onChanged: (value) {
-            setState(() => _searchText = value.toLowerCase());
-          },
+          onChanged: (value) => setState(() => _searchText = value),
         ),
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: _moviesStream,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : filteredMovies.isEmpty
+              ? const Center(child: Text('No movies found.'))
+              : GridView.builder(
+                padding: const EdgeInsets.all(8),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 8,
+                  childAspectRatio: 0.7,
+                ),
+                itemCount: filteredMovies.length,
+                itemBuilder: (context, i) {
+                  final data = filteredMovies[i].data() as Map<String, dynamic>;
+                  final posterUrl = data['poster_url'] as String?;
 
-          final allDocs = snapshot.data!.docs;
-          final filteredDocs =
-              allDocs.where((doc) {
-                final data = doc.data() as Map<String, dynamic>;
-                final name = (data['name'] as String).toLowerCase();
-                return name.contains(_searchText);
-              }).toList();
+                  return GestureDetector(
+                    onTap: () {
+                      final currentUid = FirebaseAuth.instance.currentUser?.uid;
+                      if (currentUid == null) return;
 
-          if (filteredDocs.isEmpty) {
-            return const Center(child: Text('No movies found.'));
-          }
-
-          // descending order of imdb rating
-          filteredDocs.sort((a, b) {
-            final dataA = a.data() as Map<String, dynamic>?;
-            final dataB = b.data() as Map<String, dynamic>?;
-
-            final ratingA = (dataA?['numVotes'] ?? 0).toDouble();
-            final ratingB = (dataB?['numVotes'] ?? 0).toDouble();
-
-            return ratingB.compareTo(ratingA); // descending order
-          });
-
-          return GridView.builder(
-            padding: const EdgeInsets.all(8),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3, // 3 posters per row
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-              childAspectRatio: 0.7, // poster aspect ratio
-            ),
-            itemCount: filteredDocs.length,
-            itemBuilder: (context, i) {
-              final data = filteredDocs[i].data() as Map<String, dynamic>;
-              final posterUrl = data['poster_url'] as String?;
-
-              return GestureDetector(
-                onTap: () {
-                  final currentUid = FirebaseAuth.instance.currentUser?.uid;
-                  if (currentUid == null) {
-                    return;
-                  }
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (_) => MoviePage(
-                            tconst: data['tconst'],
-                            currentUid: currentUid,
-                            otherUid: null,
-                          ),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (_) => MoviePage(
+                                tconst: data['tconst'],
+                                currentUid: currentUid,
+                                otherUid: null,
+                              ),
+                        ),
+                      );
+                    },
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child:
+                          posterUrl != null
+                              ? Image.network(
+                                posterUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder:
+                                    (_, __, ___) =>
+                                        const Icon(Icons.broken_image),
+                              )
+                              : const Icon(Icons.broken_image),
                     ),
                   );
-
-                  // Placeholder: future link to movie page
-                  // Navigator.push(...);
                 },
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child:
-                      posterUrl != null
-                          ? Image.network(
-                            posterUrl,
-                            fit: BoxFit.cover,
-                            errorBuilder:
-                                (context, error, stackTrace) =>
-                                    const Icon(Icons.broken_image),
-                          )
-                          : const Icon(Icons.broken_image),
-                ),
-              );
-            },
-          );
-        },
-      ),
+              ),
     );
   }
 }
