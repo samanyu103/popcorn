@@ -56,6 +56,7 @@ class _MoviePageState extends State<MoviePage> {
         'imdb_rating': userMovie.imdb_rating,
         'year': userMovie.year,
         'numVotes': userMovie.numVotes,
+        'recent': userMovie.recent,
       };
       _seen = userMovie.seen;
       _liked = userMovie.liked;
@@ -75,6 +76,7 @@ class _MoviePageState extends State<MoviePage> {
           'imdb_rating': otherMovie.imdb_rating,
           'year': otherMovie.year,
           'numVotes': otherMovie.numVotes,
+          'recent': otherMovie.recent,
         };
         otherliked = otherMovie.liked;
         otherreview = otherMovie.review ?? '';
@@ -214,6 +216,7 @@ class _MoviePageState extends State<MoviePage> {
                                     DateTime.now()
                                 : DateTime.now(),
                         numVotes: _movieData!['numVotes'],
+                        recent: _movieData!['recent'],
                       );
 
                       await DbService.addMovieToUser(movie, widget.currentUid);

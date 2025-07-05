@@ -4,13 +4,14 @@ class Movie {
   final String tconst;
   final String name;
   final int year;
-  final double imdb_rating;
+  final double? imdb_rating;
   final String poster_url;
   final bool seen;
   final bool? liked;
   final String? review;
   final DateTime timeAdded;
-  final int? numVotes; // New nullable field
+  final int? numVotes;
+  final bool? recent;
 
   Movie({
     required this.tconst,
@@ -23,20 +24,25 @@ class Movie {
     this.review,
     required this.timeAdded,
     this.numVotes,
+    this.recent,
   });
 
   factory Movie.fromMap(Map<String, dynamic> map) {
     return Movie(
-      tconst: map['tconst'],
-      name: map['name'],
-      year: map['year'],
-      imdb_rating: (map['imdb_rating'] as num).toDouble(),
-      poster_url: map['poster_url'],
-      seen: map['seen'],
-      liked: map['liked'],
-      review: map['review'],
+      tconst: map['tconst'] as String,
+      name: map['name'] as String,
+      year: map['year'] as int,
+      imdb_rating:
+          map['imdb_rating'] != null
+              ? (map['imdb_rating'] as num).toDouble()
+              : null,
+      poster_url: map['poster_url'] as String,
+      seen: map['seen'] ?? false,
+      liked: map['liked'] as bool?,
+      review: map['review'] as String?,
       timeAdded: (map['time_added'] as Timestamp).toDate(),
-      numVotes: map['numVotes'], // Safe: Firestore stores nulls too
+      numVotes: map['numVotes'] as int?,
+      recent: map['recent'] as bool?,
     );
   }
 
@@ -52,6 +58,7 @@ class Movie {
       'review': review,
       'time_added': Timestamp.fromDate(timeAdded),
       'numVotes': numVotes,
+      'recent': recent,
     };
   }
 }

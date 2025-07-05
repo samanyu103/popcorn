@@ -72,6 +72,7 @@ class _MoviesSearchPageState extends State<MoviesSearchPage> {
           review: '',
           timeAdded: DateTime.now(),
           numVotes: data['numVotes'],
+          recent: data['recent'],
         );
         _selectedMovies.add(movie);
       }
@@ -114,8 +115,18 @@ class _MoviesSearchPageState extends State<MoviesSearchPage> {
           ..sort((a, b) {
             final dataA = a.data() as Map<String, dynamic>?;
             final dataB = b.data() as Map<String, dynamic>?;
+
+            final recentA = dataA?['recent'] == true;
+            final recentB = dataB?['recent'] == true;
+
+            // Prioritize recent == true first
+            if (recentA && !recentB) return -1;
+            if (!recentA && recentB) return 1;
+
+            // If both are recent == true or both not recent, sort by numVotes
             final votesA = (dataA?['numVotes'] ?? 0).toDouble();
             final votesB = (dataB?['numVotes'] ?? 0).toDouble();
+
             return votesB.compareTo(votesA);
           });
 
