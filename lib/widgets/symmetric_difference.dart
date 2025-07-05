@@ -68,9 +68,9 @@ class _CompareMoviesWidgetState extends State<CompareMoviesWidget>
           unselectedLabelColor: Colors.grey,
           indicatorColor: Theme.of(context).colorScheme.primary,
           tabs: const [
-            Tab(text: '1. Both'),
-            Tab(text: '2. Yours not Theirs'),
-            Tab(text: '3. Theirs not Yours'),
+            Tab(text: 'Both'),
+            Tab(text: 'Yours not Theirs'),
+            Tab(text: 'Theirs not Yours'),
           ],
         ),
         Expanded(
