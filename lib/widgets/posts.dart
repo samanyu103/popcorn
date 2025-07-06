@@ -18,6 +18,15 @@ class MovieGrid extends StatelessWidget {
     // sort with latest post first
     movies.sort((a, b) => (b.timeAdded).compareTo(a.timeAdded));
 
+    if (movies.isEmpty) {
+      return const Center(
+        child: Text(
+          'No posts yet',
+          style: TextStyle(fontSize: 16, color: Colors.grey),
+        ),
+      );
+    }
+
     return GridView.builder(
       padding: const EdgeInsets.all(8),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

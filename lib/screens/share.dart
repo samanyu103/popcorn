@@ -17,6 +17,8 @@ class _SeenByANotBState extends State<SeenByANotB> {
   late String currentUid; // A
   late Future<List<Movie>> futureMovies;
 
+  String searchQuery = '';
+
   @override
   void initState() {
     super.initState();
@@ -48,7 +50,6 @@ class _SeenByANotBState extends State<SeenByANotB> {
       final updatedAIncoming = List<String>.from(
         aData['incomingRequests'] ?? [],
       )..remove(widget.otherUid);
-
       final updatedBOutgoing = List<String>.from(
         bData['outgoingRequests'] ?? [],
       )..remove(currentUid);
@@ -56,7 +57,6 @@ class _SeenByANotBState extends State<SeenByANotB> {
       final updatedAOut = List<Map<String, dynamic>>.from(
         aData['outgoingPopcorns'] ?? [],
       )..add(popcorn.toMap());
-
       final updatedBIn = List<Map<String, dynamic>>.from(
         bData['incomingPopcorns'] ?? [],
       )..add(popcorn.toMap());
@@ -81,7 +81,10 @@ class _SeenByANotBState extends State<SeenByANotB> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Share Popcorn"), leading: BackButton()),
+      appBar: AppBar(
+        title: const Text("Share a Popcorn"),
+        leading: const BackButton(),
+      ),
       body: FutureBuilder<List<Movie>>(
         future: futureMovies,
         builder: (context, snapshot) {
@@ -89,8 +92,8 @@ class _SeenByANotBState extends State<SeenByANotB> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final movies = snapshot.data!;
-          if (movies.isEmpty) {
+          final allMovies = snapshot.data!;
+          if (allMovies.isEmpty) {
             return const Center(
               child: Text(
                 "No movies to share",
@@ -102,55 +105,92 @@ class _SeenByANotBState extends State<SeenByANotB> {
               ),
             );
           }
-          // sort descending order of imdb ratings
-          movies.sort(
-            (a, b) => (b.imdb_rating ?? 0).compareTo(a.imdb_rating ?? 0),
-          );
-          return GridView.builder(
-            padding: const EdgeInsets.all(12),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              childAspectRatio: 2 / 3,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-            ),
-            itemCount: movies.length,
-            itemBuilder: (context, index) {
-              final movie = movies[index];
-              return GestureDetector(
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    builder:
-                        (_) => AlertDialog(
-                          title: Text(movie.name),
-                          content: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Image.network(movie.poster_url, height: 150),
-                              const SizedBox(height: 10),
-                              ElevatedButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  sharePopcorn(movie);
-                                },
-                                child: const Text("Share a Popcorn"),
-                              ),
-                            ],
-                          ),
-                        ),
-                  );
-                },
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    movie.poster_url,
-                    fit: BoxFit.cover,
-                    errorBuilder: (c, e, s) => const Icon(Icons.broken_image),
+
+          final filteredMovies =
+              allMovies
+                  .where(
+                    (movie) => movie.name.toLowerCase().contains(
+                      searchQuery.toLowerCase(),
+                    ),
+                  )
+                  .toList()
+                ..sort(
+                  (a, b) => (b.imdb_rating ?? 0).compareTo(a.imdb_rating ?? 0),
+                );
+
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 12, 12, 6),
+                child: TextField(
+                  onChanged: (value) {
+                    setState(() {
+                      searchQuery = value;
+                    });
+                  },
+                  decoration: InputDecoration(
+                    hintText: "Search movies...",
+                    prefixIcon: const Icon(Icons.search),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
-              );
-            },
+              ),
+              Expanded(
+                child: GridView.builder(
+                  padding: const EdgeInsets.all(12),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    childAspectRatio: 2 / 3,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                  ),
+                  itemCount: filteredMovies.length,
+                  itemBuilder: (context, index) {
+                    final movie = filteredMovies[index];
+                    return GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder:
+                              (_) => AlertDialog(
+                                title: Text(movie.name),
+                                content: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Image.network(
+                                      movie.poster_url,
+                                      height: 150,
+                                    ),
+                                    const SizedBox(height: 10),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                        sharePopcorn(movie);
+                                      },
+                                      child: const Text("Share a Popcorn"),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                        );
+                      },
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          movie.poster_url,
+                          fit: BoxFit.cover,
+                          errorBuilder:
+                              (c, e, s) => const Icon(Icons.broken_image),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           );
         },
       ),

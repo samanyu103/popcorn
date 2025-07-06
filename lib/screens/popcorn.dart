@@ -52,10 +52,27 @@ class _PopcornPageState extends State<PopcornPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Incoming Popcorns
-                const Text(
-                  "Incoming Popcorns",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                // const Text(
+                //   "Incoming Popcorns",
+                //   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                // ),
+                Row(
+                  children: const [
+                    Text(
+                      "Incoming Popcorn",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(width: 6),
+                    Text(
+                      "(Recommended for you)",
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ],
                 ),
+
                 const SizedBox(height: 8),
 
                 PopcornScroller(
@@ -65,10 +82,27 @@ class _PopcornPageState extends State<PopcornPage> {
                 const SizedBox(height: 20),
 
                 // Outgoing Popcorns
-                const Text(
-                  "Outgoing Popcorns",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                // const Text(
+                //   "Outgoing Popcorns",
+                //   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                // ),
+                Row(
+                  children: const [
+                    Text(
+                      "Outgoing Popcorn",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(width: 6),
+                    Text(
+                      "(Recommended by you)",
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ],
                 ),
+
                 const SizedBox(height: 8),
                 PopcornScroller(
                   popcorns: user.outgoingPopcorns,
@@ -80,7 +114,7 @@ class _PopcornPageState extends State<PopcornPage> {
                 // Incoming Requests
                 const Text(
                   "Incoming Requests",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 IncomingRequestsWidget(incomingRequests: user.incomingRequests),
@@ -90,7 +124,7 @@ class _PopcornPageState extends State<PopcornPage> {
                 // Outgoing Requests
                 const Text(
                   "Outgoing Requests",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 OutgoingRequestsWidget(outgoingRequests: user.outgoingRequests),
