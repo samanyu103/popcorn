@@ -17,6 +17,7 @@ class _MoviesSearchPageState extends State<MoviesSearchPage> {
   List<QueryDocumentSnapshot> _allMovies = [];
   bool _isLoading = true;
   bool _isPosting = false;
+  Set<String> _seenMovieIds = {};
 
   bool _selectionMode = false;
   List<Movie> _selectedMovies = [];
@@ -29,6 +30,11 @@ class _MoviesSearchPageState extends State<MoviesSearchPage> {
 
   Future<void> _loadMovies() async {
     try {
+      final currentUid = FirebaseAuth.instance.currentUser?.uid;
+      if (currentUid == null) return;
+      final seenMovies = await DbService.getUserMovies(currentUid);
+      _seenMovieIds = seenMovies.map((m) => m.tconst).toSet();
+
       final cacheSnapshot = await FirebaseFirestore.instance
           .collection('movies')
           .get(const GetOptions(source: Source.cache));
@@ -110,7 +116,12 @@ class _MoviesSearchPageState extends State<MoviesSearchPage> {
         _allMovies.where((doc) {
             final data = doc.data() as Map<String, dynamic>;
             final name = (data['name'] as String?)?.toLowerCase() ?? '';
-            return name.contains(_searchText.toLowerCase());
+            final tconst = data['tconst'] as String?;
+
+            final notSeen = tconst == null || !_seenMovieIds.contains(tconst);
+            final matchesSearch = name.contains(_searchText.toLowerCase());
+
+            return notSeen && matchesSearch;
           }).toList()
           ..sort((a, b) {
             final dataA = a.data() as Map<String, dynamic>?;
@@ -119,11 +130,9 @@ class _MoviesSearchPageState extends State<MoviesSearchPage> {
             final recentA = dataA?['recent'] == true;
             final recentB = dataB?['recent'] == true;
 
-            // Prioritize recent == true first
             if (recentA && !recentB) return -1;
             if (!recentA && recentB) return 1;
 
-            // If both are recent == true or both not recent, sort by numVotes
             final votesA = (dataA?['numVotes'] ?? 0).toDouble();
             final votesB = (dataB?['numVotes'] ?? 0).toDouble();
 
