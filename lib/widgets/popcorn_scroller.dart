@@ -47,6 +47,7 @@ class PopcornScroller extends StatelessWidget {
                               tconst: popcorn.tconst,
                               currentUid: popcorn.toUid,
                               otherUid: popcorn.fromUid,
+                              message: popcorn.message,
                             ),
                       ),
                     );
@@ -58,6 +59,7 @@ class PopcornScroller extends StatelessWidget {
                             (context) => MoviePage(
                               tconst: popcorn.tconst,
                               currentUid: popcorn.fromUid,
+                              // message: popcorn.message,
                             ),
                       ),
                     );

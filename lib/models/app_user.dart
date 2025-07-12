@@ -10,10 +10,10 @@ class AppUser {
   final String name;
   final String about;
   final List<Movie> movies;
+  final List<Movie> watchlist; // ✅ NEW FIELD
   final List<String> followers;
   final List<String> following;
   final List<Rating> rating;
-
   final List<Popcorn> incomingPopcorns;
   final List<Popcorn> outgoingPopcorns;
   final List<String> incomingRequests;
@@ -27,6 +27,7 @@ class AppUser {
     required this.name,
     required this.about,
     required this.movies,
+    required this.watchlist, // ✅ NEW PARAMETER
     required this.followers,
     required this.following,
     required this.rating,
@@ -46,6 +47,10 @@ class AppUser {
       about: map['about'],
       movies:
           (map['movies'] as List<dynamic>? ?? [])
+              .map((movieMap) => Movie.fromMap(movieMap))
+              .toList(),
+      watchlist:
+          (map['watchlist'] as List<dynamic>? ?? []) // ✅ NULL-SAFE
               .map((movieMap) => Movie.fromMap(movieMap))
               .toList(),
       followers: List<String>.from(map['followers'] ?? []),
@@ -76,6 +81,7 @@ class AppUser {
       'name': name,
       'about': about,
       'movies': movies.map((movie) => movie.toMap()).toList(),
+      'watchlist': watchlist.map((movie) => movie.toMap()).toList(), // ✅
       'followers': followers,
       'following': following,
       'rating': rating.map((r) => r.toMap()).toList(),

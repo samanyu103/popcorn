@@ -9,11 +9,6 @@ import '../widgets/posts.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  // 0--home
-  // 1 -- search
-  // 2 -- movies search
-  // 3 -- matches
-  // 4 --
   void _onNavTapped(BuildContext context, int index) {
     if (index == 1) {
       Navigator.pushNamed(context, '/search');
@@ -24,7 +19,6 @@ class HomeScreen extends StatelessWidget {
     if (index == 3) {
       Navigator.pushNamed(context, '/matches');
     }
-
     if (index == 4) {
       Navigator.pushNamed(context, '/popcorn');
     }
@@ -52,120 +46,7 @@ class HomeScreen extends StatelessWidget {
               ),
         ),
       ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(color: Colors.blue),
-              child: Text(
-                'Settings',
-                style: TextStyle(color: Colors.white, fontSize: 24),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.edit),
-              title: const Text('Edit Profile'),
-              onTap: () {
-                Navigator.pop(context); // close drawer
-                Navigator.pushNamed(context, '/details');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text('Logout'),
-              onTap: () async {
-                Navigator.pop(context); // Close the drawer first
-                final confirm = await showDialog<bool>(
-                  context: context,
-                  builder:
-                      (context) => AlertDialog(
-                        title: const Text('Confirm Logout'),
-                        content: const Text('Are you sure you want to logout?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(false),
-                            child: const Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(true),
-                            child: const Text('Logout'),
-                          ),
-                        ],
-                      ),
-                );
-
-                if (confirm == true) {
-                  await _authService.signOut();
-                  if (context.mounted) {
-                    Navigator.pushReplacementNamed(context, '/login');
-                  }
-                }
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.contact_mail),
-              title: const Text('Contact Us'),
-              onTap: () {
-                Navigator.pop(context); // Close the drawer
-                Navigator.pushNamed(context, '/contact');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.delete_forever, color: Colors.red),
-              title: const Text(
-                'Delete Account',
-                style: TextStyle(color: Colors.red),
-              ),
-              onTap: () async {
-                Navigator.pop(context); // Close the drawer first
-                final confirm = await showDialog<bool>(
-                  context: context,
-                  builder:
-                      (context) => AlertDialog(
-                        title: const Text('Confirm Delete'),
-                        content: const Text(
-                          'This will permanently delete your account. Are you sure?',
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(false),
-                            child: const Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(true),
-                            child: const Text(
-                              'Delete',
-                              style: TextStyle(color: Colors.red),
-                            ),
-                          ),
-                        ],
-                      ),
-                );
-
-                if (confirm == true) {
-                  try {
-                    await _authService.deleteAccount();
-                    if (context.mounted) {
-                      Navigator.pushReplacementNamed(context, '/login');
-                    }
-                  } catch (e) {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Error deleting account: ${e.toString()}',
-                          ),
-                        ),
-                      );
-                    }
-                  }
-                }
-              },
-            ),
-          ],
-        ),
-      ),
+      drawer: _buildDrawer(context, _authService),
       body: StreamBuilder<DocumentSnapshot>(
         stream:
             FirebaseFirestore.instance
@@ -178,19 +59,44 @@ class HomeScreen extends StatelessWidget {
           }
 
           final user = snapshot.data!.data() as Map<String, dynamic>?;
-
           if (user == null) {
             return const Center(child: Text('User data not found.'));
           }
-          // print("user $user");
+
           final rawMovies = user['movies'] as List<dynamic>? ?? [];
           final movies = rawMovies.map((m) => Movie.fromMap(m)).toList();
+
+          final watchlistRaw = user['watchlist'] as List<dynamic>? ?? [];
+          final watchlistMovies =
+              watchlistRaw.map((m) => Movie.fromMap(m)).toList();
 
           return Column(
             children: [
               UserProfileInfo(user: user),
               const SizedBox(height: 10),
-              Expanded(child: MovieGrid(movies: movies, uid: user['uid'])),
+              Expanded(
+                child: DefaultTabController(
+                  length: 2,
+                  child: Column(
+                    children: [
+                      const TabBar(
+                        tabs: [Tab(text: 'Seen'), Tab(text: 'Watchlist')],
+                      ),
+                      Expanded(
+                        child: TabBarView(
+                          children: [
+                            MovieGrid(movies: movies, uid: user['uid']),
+                            MovieGrid(
+                              movies: watchlistMovies,
+                              uid: user['uid'],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           );
         },
@@ -213,6 +119,111 @@ class HomeScreen extends StatelessWidget {
           BottomNavigationBarItem(
             icon: Text('🍿', style: TextStyle(fontSize: 24)),
             label: 'Popcorn',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDrawer(BuildContext context, AuthService _authService) {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          const DrawerHeader(
+            decoration: BoxDecoration(color: Colors.blue),
+            child: Text(
+              'Settings',
+              style: TextStyle(color: Colors.white, fontSize: 24),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.edit),
+            title: const Text('Edit Profile'),
+            onTap: () => Navigator.pushNamed(context, '/details'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.logout),
+            title: const Text('Logout'),
+            onTap: () async {
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder:
+                    (context) => AlertDialog(
+                      title: const Text('Confirm Logout'),
+                      content: const Text('Are you sure you want to logout?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text('Logout'),
+                        ),
+                      ],
+                    ),
+              );
+              if (confirm == true) {
+                await _authService.signOut();
+                if (context.mounted)
+                  Navigator.pushReplacementNamed(context, '/login');
+              }
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.contact_mail),
+            title: const Text('Contact Us'),
+            onTap: () => Navigator.pushNamed(context, '/contact'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.delete_forever, color: Colors.red),
+            title: const Text(
+              'Delete Account',
+              style: TextStyle(color: Colors.red),
+            ),
+            onTap: () async {
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder:
+                    (context) => AlertDialog(
+                      title: const Text('Confirm Delete'),
+                      content: const Text(
+                        'This will permanently delete your account. Are you sure?',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text(
+                            'Delete',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ),
+                      ],
+                    ),
+              );
+              if (confirm == true) {
+                try {
+                  await _authService.deleteAccount();
+                  if (context.mounted)
+                    Navigator.pushReplacementNamed(context, '/login');
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Error deleting account: ${e.toString()}',
+                        ),
+                      ),
+                    );
+                  }
+                }
+              }
+            },
           ),
         ],
       ),

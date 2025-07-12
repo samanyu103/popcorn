@@ -60,6 +60,7 @@ class DbService {
       'outgoingPopcorns': [],
       'incomingRequests': [],
       'outgoingRequests': [],
+      'watchlist': [],
     });
   }
 
@@ -330,5 +331,101 @@ class DbService {
     await FirebaseFirestore.instance.collection('users').doc(uid).update({
       'profile_picture': null,
     });
+  }
+
+  static Future<List<Movie>> getWatchlist(String uid) async {
+    try {
+      final docSnapshot =
+          await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      if (!docSnapshot.exists) return [];
+
+      final data = docSnapshot.data();
+      if (data == null || !data.containsKey('watchlist')) return [];
+
+      final watchlistData = List<Map<String, dynamic>>.from(
+        data['watchlist'].map((e) => Map<String, dynamic>.from(e)),
+      );
+
+      return watchlistData.map((movieMap) => Movie.fromMap(movieMap)).toList();
+    } catch (e) {
+      print('Error fetching watchlist for user $uid: $e');
+      return [];
+    }
+  }
+
+  static Future<void> addMovieToWatchlist(String uid, Movie movie) async {
+    try {
+      final userRef = FirebaseFirestore.instance.collection('users').doc(uid);
+      final doc = await userRef.get();
+      final data = doc.data();
+
+      List<Map<String, dynamic>> currentWatchlist = [];
+
+      if (data != null && data.containsKey('watchlist')) {
+        currentWatchlist = List<Map<String, dynamic>>.from(
+          data['watchlist'].map((e) => Map<String, dynamic>.from(e)),
+        );
+      }
+
+      // Prevent duplicates
+      final alreadyExists = currentWatchlist.any(
+        (m) => m['tconst'] == movie.tconst,
+      );
+      if (!alreadyExists) {
+        currentWatchlist.add(movie.toMap());
+        await userRef.update({'watchlist': currentWatchlist});
+      }
+    } catch (e) {
+      print('Error adding movie to watchlist: $e');
+    }
+  }
+
+  static Future<void> removeMovieFromWatchlist(
+    String uid,
+    String tconst,
+  ) async {
+    try {
+      final userRef = FirebaseFirestore.instance.collection('users').doc(uid);
+      final doc = await userRef.get();
+      final data = doc.data();
+
+      if (data == null || !data.containsKey('watchlist')) return;
+
+      final currentWatchlist = List<Map<String, dynamic>>.from(
+        data['watchlist'].map((e) => Map<String, dynamic>.from(e)),
+      );
+
+      final updatedWatchlist =
+          currentWatchlist.where((m) => m['tconst'] != tconst).toList();
+
+      await userRef.update({'watchlist': updatedWatchlist});
+    } catch (e) {
+      print('Error removing movie from watchlist: $e');
+    }
+  }
+
+  static Future<Movie?> getMovieFromWatchlist(String uid, String tconst) async {
+    try {
+      final docSnapshot =
+          await FirebaseFirestore.instance.collection('users').doc(uid).get();
+
+      final data = docSnapshot.data();
+      if (data == null || !data.containsKey('watchlist')) return null;
+
+      final watchlist = List<Map<String, dynamic>>.from(
+        data['watchlist'].map((e) => Map<String, dynamic>.from(e)),
+      );
+
+      final movieMap = watchlist.firstWhere(
+        (m) => m['tconst'] == tconst,
+        orElse: () => {},
+      );
+
+      if (movieMap.isEmpty) return null;
+      return Movie.fromMap(movieMap);
+    } catch (e) {
+      print('Error getting movie from watchlist: $e');
+      return null;
+    }
   }
 }

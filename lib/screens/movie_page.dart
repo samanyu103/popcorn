@@ -9,6 +9,7 @@ class MoviePage extends StatefulWidget {
   final String currentUid;
   final String? otherUid;
   final bool viewOnly;
+  final String? message;
 
   const MoviePage({
     super.key,
@@ -16,6 +17,7 @@ class MoviePage extends StatefulWidget {
     required this.currentUid,
     this.otherUid,
     this.viewOnly = false,
+    this.message,
   });
 
   @override
@@ -32,6 +34,7 @@ class _MoviePageState extends State<MoviePage> {
   Movie? _existingUserMovie;
   bool foundincuruserdb = false;
   bool foundinotheruserdb = false;
+  bool _inWatchlist = false;
 
   bool get isViewOnly => widget.viewOnly;
 
@@ -45,7 +48,7 @@ class _MoviePageState extends State<MoviePage> {
     final cuid = widget.currentUid;
     final ouid = widget.otherUid;
     final tconst = widget.tconst;
-
+    // Check current user's movie
     final userMovie = await DbService.getMovieUser(cuid, tconst);
     if (userMovie != null) {
       foundincuruserdb = true;
@@ -62,10 +65,11 @@ class _MoviePageState extends State<MoviePage> {
       _liked = userMovie.liked;
       _reviewController.text = userMovie.review ?? '';
       setState(() {});
-      return;
+      // return;
     }
 
-    if (ouid != null) {
+    // Check other user's movie
+    if (ouid != null && !foundincuruserdb) {
       final otherMovie = await DbService.getMovieUser(ouid, tconst);
       if (otherMovie != null) {
         foundinotheruserdb = true;
@@ -81,21 +85,39 @@ class _MoviePageState extends State<MoviePage> {
         otherliked = otherMovie.liked;
         otherreview = otherMovie.review ?? '';
         setState(() {});
-        return;
+        // return;
       }
     }
-
-    final movieDoc =
-        await FirebaseFirestore.instance
-            .collection('movies')
-            .doc(widget.tconst)
-            .get();
-
-    if (movieDoc.exists) {
-      _movieData = movieDoc.data();
+    // check the watchlist
+    final watchlist_movie = await DbService.getMovieFromWatchlist(cuid, tconst);
+    if (watchlist_movie != null) {
+      _inWatchlist = true;
+      _movieData = {
+        'name': watchlist_movie.name,
+        'poster_url': watchlist_movie.poster_url,
+        'imdb_rating': watchlist_movie.imdb_rating,
+        'year': watchlist_movie.year,
+        'numVotes': watchlist_movie.numVotes,
+        'recent': watchlist_movie.recent,
+      };
+      setState(() {});
     }
 
-    setState(() {});
+    // Fallback to base movie data
+
+    if (!foundincuruserdb && !foundinotheruserdb && !_inWatchlist) {
+      final movieDoc =
+          await FirebaseFirestore.instance
+              .collection('movies')
+              .doc(tconst)
+              .get();
+
+      if (movieDoc.exists) {
+        _movieData = movieDoc.data();
+      }
+
+      setState(() {});
+    }
   }
 
   @override
@@ -220,13 +242,16 @@ class _MoviePageState extends State<MoviePage> {
                       );
 
                       await DbService.addMovieToUser(movie, widget.currentUid);
-                      // remove from incoming popcorn
                       await DbService.removeFromIncomingPopcorn(
                         widget.tconst,
                         widget.currentUid,
                       );
+                      // if inwatchlist?
+                      await DbService.removeMovieFromWatchlist(
+                        widget.currentUid,
+                        widget.tconst,
+                      );
 
-                      // ratings
                       if (foundinotheruserdb) {
                         final user = await DbService().getUserProfile(
                           widget.currentUid,
@@ -259,6 +284,7 @@ class _MoviePageState extends State<MoviePage> {
                     child: Text(foundincuruserdb ? 'Update' : 'Post'),
                   ),
               ] else ...[
+                // not seen then
                 if (!isViewOnly && foundincuruserdb)
                   ElevatedButton(
                     onPressed: () async {
@@ -273,46 +299,121 @@ class _MoviePageState extends State<MoviePage> {
                     child: const Text('Remove'),
                   ),
 
-                if (foundinotheruserdb) ...[
-                  // const SizedBox(height: 20),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 👍👎 Icons
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.thumb_up,
-                            color:
-                                otherliked == true ? Colors.green : Colors.grey,
-                          ),
-                          const SizedBox(width: 20),
-                          Icon(
-                            Icons.thumb_down,
-                            color:
-                                otherliked == false ? Colors.red : Colors.grey,
-                          ),
-                        ],
-                      ),
+                if (!isViewOnly && !foundincuruserdb) ...[
+                  IconButton(
+                    icon: Icon(
+                      _inWatchlist ? Icons.check : Icons.add,
+                      color: _inWatchlist ? Colors.green : null,
+                      size: 30,
+                    ),
+                    tooltip:
+                        _inWatchlist
+                            ? 'Remove from Watchlist'
+                            : 'Add to Watchlist',
+                    onPressed: () async {
+                      if (_inWatchlist) {
+                        await DbService.removeMovieFromWatchlist(
+                          widget.currentUid,
+                          widget.tconst,
+                        );
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Removed from watchlist'),
+                            ),
+                          );
+                        }
+                      } else {
+                        final movie = Movie(
+                          tconst: widget.tconst,
+                          name: _movieData!['name'],
+                          year: _movieData!['year'],
+                          imdb_rating: _movieData!['imdb_rating'],
+                          poster_url: _movieData!['poster_url'],
+                          seen: false,
+                          liked: null,
+                          review: null,
+                          timeAdded: DateTime.now(),
+                          numVotes: _movieData!['numVotes'],
+                          recent: _movieData!['recent'],
+                        );
 
-                      // Review box if available
-                      if (otherreview != null &&
-                          otherreview!.trim().isNotEmpty) ...[
-                        const SizedBox(height: 16),
-                        TextField(
-                          readOnly: true,
-                          controller: TextEditingController(text: otherreview),
-                          decoration: const InputDecoration(
-                            labelText: 'review',
-                            border: OutlineInputBorder(),
-                            floatingLabelBehavior: FloatingLabelBehavior.always,
+                        await DbService.addMovieToWatchlist(
+                          widget.currentUid,
+                          movie,
+                        );
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Added to watchlist')),
+                          );
+                        }
+                      }
+
+                      setState(() {
+                        _inWatchlist = !_inWatchlist;
+                      });
+                    },
+                  ),
+                ],
+
+                // message
+                // Display the message if it exists
+                if (widget.message != null &&
+                    widget.message!.trim().isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.yellow[100],
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.yellow[700]!),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.message, color: Colors.orange),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            widget.message!,
+                            style: const TextStyle(fontSize: 16),
                           ),
-                          maxLines: 4,
                         ),
                       ],
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 20),
+
+                if (foundinotheruserdb) ...[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.thumb_up,
+                        color: otherliked == true ? Colors.green : Colors.grey,
+                      ),
+                      const SizedBox(width: 20),
+                      Icon(
+                        Icons.thumb_down,
+                        color: otherliked == false ? Colors.red : Colors.grey,
+                      ),
                     ],
                   ),
+                  if (otherreview != null &&
+                      otherreview!.trim().isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    TextField(
+                      readOnly: true,
+                      controller: TextEditingController(text: otherreview),
+                      decoration: const InputDecoration(
+                        labelText: 'review',
+                        border: OutlineInputBorder(),
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
+                      ),
+                      maxLines: 4,
+                    ),
+                  ],
                 ],
               ],
             ],

@@ -3,12 +3,14 @@ class Popcorn {
   final String toUid;
   final String tconst;
   final int timestamp;
+  final String? message; // <-- New optional field
 
   Popcorn({
     required this.fromUid,
     required this.toUid,
     required this.tconst,
     required this.timestamp,
+    this.message, // <-- Optional in constructor
   });
 
   factory Popcorn.fromMap(Map<String, dynamic> map) {
@@ -17,6 +19,7 @@ class Popcorn {
       toUid: map['toUid'],
       tconst: map['tconst'],
       timestamp: map['timestamp'],
+      message: map['message'], // <-- Will be null if not present
     );
   }
 
@@ -26,6 +29,7 @@ class Popcorn {
       'toUid': toUid,
       'tconst': tconst,
       'timestamp': timestamp,
+      if (message != null) 'message': message, // <-- Store only if not null
     };
   }
 }

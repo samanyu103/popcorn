@@ -26,13 +26,14 @@ class _SeenByANotBState extends State<SeenByANotB> {
     futureMovies = DbService.getSeenByANotB(currentUid, widget.otherUid);
   }
 
-  void sharePopcorn(Movie movie) async {
+  Future<void> sharePopcorn(Movie movie, String? message) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final popcorn = Popcorn(
       fromUid: currentUid,
       toUid: widget.otherUid,
       tconst: movie.tconst,
       timestamp: now,
+      message: message,
     );
 
     final aRef = FirebaseFirestore.instance.collection('users').doc(currentUid);
@@ -75,7 +76,9 @@ class _SeenByANotBState extends State<SeenByANotB> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text("Popcorn shared!")));
-    Navigator.pushNamed(context, '/popcorn');
+
+    // done in onpressed
+    // Navigator.pushNamed(context, '/popcorn');
   }
 
   @override
@@ -152,6 +155,9 @@ class _SeenByANotBState extends State<SeenByANotB> {
                     final movie = filteredMovies[index];
                     return GestureDetector(
                       onTap: () {
+                        final TextEditingController messageController =
+                            TextEditingController();
+
                         showDialog(
                           context: context,
                           builder:
@@ -165,10 +171,31 @@ class _SeenByANotBState extends State<SeenByANotB> {
                                       height: 150,
                                     ),
                                     const SizedBox(height: 10),
+                                    TextField(
+                                      controller: messageController,
+                                      maxLines: 3,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Add a message (optional)',
+                                        border: OutlineInputBorder(),
+                                        alignLabelWithHint: true,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
                                     ElevatedButton(
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                        sharePopcorn(movie);
+                                      onPressed: () async {
+                                        final message =
+                                            messageController.text.trim();
+                                        Navigator.pop(context); // Close dialog
+                                        await sharePopcorn(
+                                          movie,
+                                          message.isEmpty ? null : message,
+                                        );
+                                        if (mounted) {
+                                          Navigator.pushNamed(
+                                            context,
+                                            '/popcorn',
+                                          );
+                                        }
                                       },
                                       child: const Text("Share a Popcorn"),
                                     ),
@@ -177,6 +204,7 @@ class _SeenByANotBState extends State<SeenByANotB> {
                               ),
                         );
                       },
+
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: Image.network(
