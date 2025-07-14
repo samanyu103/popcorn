@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/db.dart';
 import '../models/movie.dart';
 import '../models/rating.dart';
+import '../models/popcorn.dart';
 
 class MoviePage extends StatefulWidget {
   final String tconst;
@@ -242,17 +243,19 @@ class _MoviePageState extends State<MoviePage> {
                       );
 
                       await DbService.addMovieToUser(movie, widget.currentUid);
-                      await DbService.removeFromIncomingPopcorn(
-                        widget.tconst,
-                        widget.currentUid,
-                      );
+                      final removedPopcorn =
+                          await DbService.removeFromIncomingPopcorn(
+                            widget.tconst,
+                            widget.currentUid,
+                          );
                       // if inwatchlist?
+                      // print("removed popcorn ${removedPopcorn?.fromUid}");
                       await DbService.removeMovieFromWatchlist(
                         widget.currentUid,
                         widget.tconst,
                       );
-
-                      if (foundinotheruserdb) {
+                      // rating adding from watch list
+                      if (foundinotheruserdb || removedPopcorn != null) {
                         final user = await DbService().getUserProfile(
                           widget.currentUid,
                         );
@@ -271,10 +274,10 @@ class _MoviePageState extends State<MoviePage> {
                           timeAdded: DateTime.now(),
                           toUserName: username,
                         );
-                        await DbService.addRatingToUser(
-                          rating,
-                          widget.otherUid!,
-                        );
+                        // if removing from watchlist and not incoming popcorn then add rating to removedpopcorn's from uid
+                        final addRatingToUid =
+                            widget.otherUid ?? removedPopcorn!.fromUid;
+                        await DbService.addRatingToUser(rating, addRatingToUid);
                       }
 
                       if (context.mounted) {

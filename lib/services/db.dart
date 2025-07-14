@@ -265,23 +265,33 @@ class DbService {
     }
   }
 
-  static Future<void> removeFromIncomingPopcorn(
+  static Future<Popcorn?> removeFromIncomingPopcorn(
     String tconst,
     String uid,
   ) async {
     final userRef = FirebaseFirestore.instance.collection('users').doc(uid);
     final userSnap = await userRef.get();
 
-    if (!userSnap.exists) return;
+    if (!userSnap.exists) return null;
 
     final data = userSnap.data();
     final List<dynamic> incoming = data?['incomingPopcorns'] ?? [];
 
-    // Find the matching popcorn(s)
-    final updatedIncoming = List<Map<String, dynamic>>.from(incoming)
-      ..removeWhere((pop) => pop['tconst'] == tconst);
+    // Find the popcorn to remove
+    Map<String, dynamic>? found;
+    final updatedIncoming = <Map<String, dynamic>>[];
+
+    for (final pop in incoming) {
+      if (pop['tconst'] == tconst && found == null) {
+        found = Map<String, dynamic>.from(pop);
+        continue; // skip adding this to updated list
+      }
+      updatedIncoming.add(Map<String, dynamic>.from(pop));
+    }
 
     await userRef.update({'incomingPopcorns': updatedIncoming});
+
+    return found != null ? Popcorn.fromMap(found) : null;
   }
 
   static Future<void> addRatingToUser(Rating rating, String uid) async {
