@@ -10,7 +10,7 @@ output_jsonl = 'posters.jsonl'
 # Load movie titles from CSV
 df = pd.read_csv(input_csv, header=None, names=['title'])
 
-with open(output_jsonl, 'w', encoding='utf-8') as outfile:
+with open(output_jsonl, 'a', encoding='utf-8') as outfile:
     for title in df['title']:
         title = title.strip()
         print(f"Fetching: {title}")

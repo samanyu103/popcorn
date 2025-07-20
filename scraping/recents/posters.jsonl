@@ -7,3 +7,12 @@
 {"tconst": "tt24225606", "year": 2024, "name": "Metro.... In Dino", "imdb_rating": 8.2, "numVotes": 5300, "recent": true, "poster_url": "https://m.media-amazon.com/images/M/MV5BMTU0ZTA4NzMtYzlmZi00MThkLWEwNGUtYzI3NzU2NmIwZTYwXkEyXkFqcGc@._V1_SX300.jpg"}
 {"tconst": "tt7181546", "year": 2025, "name": "Ballerina", "imdb_rating": 7.2, "numVotes": 34160, "recent": true, "poster_url": "https://m.media-amazon.com/images/M/MV5BNzdhZmY2OTQtYWI4OC00ZThkLTlhZjAtNzE2YzRjM2Q5YjJlXkEyXkFqcGc@._V1_SX300.jpg"}
 {"tconst": "tt4900148", "year": 2025, "name": "Elio", "imdb_rating": 7.0, "numVotes": 8500, "recent": true, "poster_url": "https://m.media-amazon.com/images/M/MV5BOWE5ZDMyMWEtOTZjMi00YzFhLWE4OTEtNDc3MDMzZjFmMmIzXkEyXkFqcGc@._V1_SX300.jpg"}
+// ########################################## 20/7/25 ####################################################
+{"tconst": "tt10676052", "year": 2025, "name": "The Fantastic Four: First Steps", "imdb_rating": null, "numVotes": null, "recent": true, "poster_url": "https://m.media-amazon.com/images/M/MV5BOGM5MzA3MDAtYmEwMi00ZDNiLTg4MDgtMTZjOTc0ZGMyNTIwXkEyXkFqcGc@._V1_SX300.jpg"}
+{"tconst": "tt31598703", "year": 2025, "name": "Tanvi: The Great", "imdb_rating": 6.9, "numVotes": 1200, "recent": true, "poster_url": "https://m.media-amazon.com/images/M/MV5BMGEwMDFmNGMtZmY2OS00OWJlLWFiMjQtYjg1NzFmYjcwNmVkXkEyXkFqcGc@._V1_SX300.jpg"}
+{"tconst": "tt5950044", "year": 2025, "name": "Superman", "imdb_rating": 7.6, "numVotes": 115120, "recent": true, "poster_url": "https://m.media-amazon.com/images/M/MV5BOGMwZGJiM2EtMzEwZC00YTYzLWIxNzYtMmJmZWNlZjgxZTMwXkEyXkFqcGc@._V1_SX300.jpg"}
+{"tconst": "tt32832266", "year": 2025, "name": "Maalik", "imdb_rating": 7.4, "numVotes": 8400, "recent": true, "poster_url": "https://m.media-amazon.com/images/M/MV5BMWY5ZjlmZmItNjQ4Ni00ZjEwLWJhNTYtODg2ZDA5MWI3YzRkXkEyXkFqcGc@._V1_SX300.jpg"}
+{"tconst": "tt28037987", "year": 2025, "name": "Saiyaara", "imdb_rating": 8.4, "numVotes": 11000, "recent": false, "poster_url": null}
+
+// {"tconst": "tt0078346", "year": 1978, "name": "Superman", "imdb_rating": 7.4, "numVotes": 197008, "recent": true, "poster_url": "https://m.media-amazon.com/images/M/MV5BMzFlZDJjMDAtZDYxZS00NzZhLTk2ODMtZWRlODA3Njk3ZTdmXkEyXkFqcGc@._V1_SX300.jpg"}
+// {"tconst": "tt5271442", "year": 2016, "name": "Maalik", "imdb_rating": 7.9, "numVotes": 3873, "recent": true, "poster_url": "https://m.media-amazon.com/images/M/MV5BNjVlY2M0MTUtYzgyYS00YTk0LTkxYTEtMTI4ZmY4NjIxMWZlXkEyXkFqcGdeQXVyMzc0NzU5MTc@._V1_SX300.jpg"}
