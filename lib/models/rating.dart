@@ -27,7 +27,10 @@ class Rating {
       liked: map['liked'],
       score: map['score'] ?? 0,
       toUserName: map['toUserName'] ?? '',
-      timeAdded: (map['time_added'] as Timestamp).toDate(),
+      timeAdded:
+          map['time_added'] != null
+              ? (map['time_added'] as Timestamp).toDate()
+              : DateTime.now(),
     );
   }
 

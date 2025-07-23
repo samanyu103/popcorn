@@ -18,7 +18,7 @@ class Popcorn {
       fromUid: map['fromUid'],
       toUid: map['toUid'],
       tconst: map['tconst'],
-      timestamp: map['timestamp'],
+      timestamp: (map['timestamp'] ?? 0) as int,
       message: map['message'], // <-- Will be null if not present
     );
   }

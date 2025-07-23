@@ -5,4 +5,4 @@ change all recents to false in poster.jsonl
 python poster.py
 correct null values
 python upload_to_firestore.py
-might have to reset bcoz of firestore caching
+might have to reset bcoz of firestore caching--  comment line 43 to 47 and 56 in seach_movies.

@@ -31,7 +31,7 @@ class Movie {
     return Movie(
       tconst: map['tconst'] as String,
       name: map['name'] as String,
-      year: map['year'] as int,
+      year: map['year'] ?? 0,
       imdb_rating:
           map['imdb_rating'] != null
               ? (map['imdb_rating'] as num).toDouble()
@@ -40,7 +40,10 @@ class Movie {
       seen: map['seen'] ?? false,
       liked: map['liked'] as bool?,
       review: map['review'] as String?,
-      timeAdded: (map['time_added'] as Timestamp).toDate(),
+      timeAdded:
+          map['time_added'] != null
+              ? (map['time_added'] as Timestamp).toDate()
+              : DateTime.now(),
       numVotes: map['numVotes'] as int?,
       recent: map['recent'] as bool?,
     );

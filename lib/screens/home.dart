@@ -143,6 +143,11 @@ class HomeScreen extends StatelessWidget {
             onTap: () => Navigator.pushNamed(context, '/details'),
           ),
           ListTile(
+            leading: const Icon(Icons.info_outline),
+            title: const Text('How to Use'),
+            onTap: () => Navigator.pushNamed(context, '/how_to_use'),
+          ),
+          ListTile(
             leading: const Icon(Icons.logout),
             title: const Text('Logout'),
             onTap: () async {

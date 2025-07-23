@@ -16,6 +16,7 @@ import 'screens/popcorn.dart';
 import 'screens/matching.dart';
 import 'screens/logo.dart';
 import 'screens/contact.dart';
+import 'screens/how_to_use.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,24 +24,32 @@ void main() async {
   runApp(const AppBootstrapper());
 }
 
+// class AppBootstrapper extends StatelessWidget {
+//   const AppBootstrapper({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return FutureBuilder(
+//       future: Future.delayed(const Duration(seconds: 2)),
+//       builder: (context, snapshot) {
+//         if (snapshot.connectionState != ConnectionState.done) {
+//           return const MaterialApp(
+//             debugShowCheckedModeBanner: false,
+//             home: InitialScreen(),
+//           );
+//         }
+
+//         return const MyApp();
+//       },
+//     );
+//   }
+// }
 class AppBootstrapper extends StatelessWidget {
   const AppBootstrapper({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: Future.delayed(const Duration(seconds: 2)),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return const MaterialApp(
-            debugShowCheckedModeBanner: false,
-            home: InitialScreen(),
-          );
-        }
-
-        return const MyApp();
-      },
-    );
+    return const MyApp(); // directly return the main app
   }
 }
 
@@ -65,6 +74,7 @@ class MyApp extends StatelessWidget {
         '/forgot-password': (_) => const ForgotPasswordScreen(),
         '/matches': (_) => const FindMatchesPage(),
         '/contact': (context) => const ContactPage(),
+        '/how_to_use': (context) => const HowToUsePage(),
       },
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),

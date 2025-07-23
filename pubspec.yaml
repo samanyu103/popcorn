@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.11+12
+version: 1.0.15+16
 
 environment:
   sdk: ^3.7.2
@@ -84,6 +84,21 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  flutter_native_splash: ^2.3.10
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/popcorn.png" 
+
+# flutter_native_splash:
+#   color: "#ffffff"                  # Background color of splash screen
+#   image: assets/share_a_popcorn.png     # Path to your custom logo
+#   android: true
+#   ios: true
+#   fullscreen: true                 # Optional: removes status bar
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -99,6 +114,8 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/share_a_popcorn.png
+    - assets/popcorn.png
+
 
     # - images/a_dot_burr.jpeg
     # - images/a_dot_ham.jpeg
