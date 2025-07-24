@@ -67,6 +67,13 @@
 				</array>
 			</dict>
 		</array>
+		
+		<key>LSApplicationQueriesSchemes</key>
+		<array>
+			<string>whatsapp</string>
+		</array>
+
+
 		<key>UIStatusBarHidden</key>
 		<true/>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
