@@ -1,16 +1,17 @@
 # popcorn
 
-A new Flutter project.
+social networking site for sharing movies
 
-## Getting Started
+## Features
+Me and Sauditya Jaiswal have made the app Popkorn for movie lovers. Currently we have deployed it only on Play Store.
 
-This project is a starting point for a Flutter application.
+Description:
 
-A few resources to get you started if this is your first Flutter project:
+Struggling to pick your next movie? Popkorn connects you with people who share your taste, so you get trusted recommendations.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+-- Find users with similar movie preferences
+-- See what you’ve both watched (and haven’t)
+-- Request movie suggestions
+-- Earn ratings when others like your picks
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Instructions on how to use: go to settings (3 horizontal bars at the top left) → How to Use.
